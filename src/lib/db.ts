@@ -62,6 +62,17 @@ try {
       sqlite.pragma("user_version = 1");
     })();
   }
+  // v2: photo motion clips
+  if (Number(sqlite.pragma("user_version", { simple: true }) ?? 0) < 2) {
+    sqlite.transaction(() => {
+      const cols = sqlite.prepare("PRAGMA table_info(photos)").all() as { name: string }[];
+      if (cols.length > 0 && !cols.some((c) => c.name === "video")) {
+        sqlite.exec("ALTER TABLE photos ADD COLUMN video blob");
+        sqlite.exec("ALTER TABLE photos ADD COLUMN video_mime text");
+      }
+      sqlite.pragma("user_version = 2");
+    })();
+  }
 } catch {
   // parallel build workers may race here; the next open retries
 }

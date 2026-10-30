@@ -26,6 +26,8 @@ export type TimelineEvent = {
 export type PhotoMeta = {
   id: number;
   caption: string;
+  /** a generated motion clip is ready at /api/photos/:id/video */
+  hasVideo: boolean;
 };
 
 export type ChatQuote = {

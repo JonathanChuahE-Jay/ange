@@ -5,6 +5,7 @@ import * as t from "@/lib/schema";
 import { ApiError } from "@/lib/errors";
 import { requireAuth } from "@/lib/auth";
 import { paged, parsePage, route } from "@/lib/handlers";
+import { enqueuePhotoVideo, isPhotoVideoFailed, isPhotoVideoPending } from "@/lib/photoVideo";
 
 const bodySchema = z.object({
   id: z.number().int(),
@@ -25,6 +26,7 @@ export async function GET(req: Request) {
         id: t.photos.id,
         caption: t.photos.caption,
         mime: t.photos.mime,
+        hasVideo: sql<number>`${t.photos.video} IS NOT NULL`,
         position: t.photos.position,
         createdAt: t.photos.createdAt,
       })
@@ -34,7 +36,13 @@ export async function GET(req: Request) {
       .offset((p.page - 1) * p.pageSize)
       .all();
     const total = db.select({ v: sql<number>`COUNT(*)` }).from(t.photos).all()[0];
-    return Response.json(paged(rows, Number(total?.v ?? 0), p));
+    const items = rows.map((r) => ({
+      ...r,
+      hasVideo: Boolean(r.hasVideo),
+      videoPending: !r.hasVideo && isPhotoVideoPending(r.id),
+      videoFailed: !r.hasVideo && isPhotoVideoFailed(r.id),
+    }));
+    return Response.json(paged(items, Number(total?.v ?? 0), p));
   });
 }
 
@@ -66,6 +74,8 @@ export async function POST(req: Request) {
       })
       .returning({ id: t.photos.id, caption: t.photos.caption })
       .all();
+    // render the motion clip in the background; the upload returns right away
+    enqueuePhotoVideo(inserted[0].id);
     return Response.json(inserted[0], { status: 201 });
   });
 }

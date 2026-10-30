@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, messageForCode } from "@/lib/api";
 import type { Paged, PhotoMeta } from "@/lib/types";
 import { useToast } from "@/components/ui/Toast";
@@ -10,7 +10,7 @@ import { EditorModal } from "./EditorModal";
 import { useResource } from "./useResource";
 import { TextField } from "@/components/ui/Field";
 
-type AdminPhoto = PhotoMeta & { mime: string; position: number; createdAt: string };
+type AdminPhoto = PhotoMeta & { mime: string; position: number; createdAt: string; videoPending?: boolean; videoFailed?: boolean };
 
 export function PhotosManager() {
   const qc = useQueryClient();
@@ -21,6 +21,14 @@ export function PhotosManager() {
   const [captioning, setCaptioning] = useState<AdminPhoto | null>(null);
   const [caption, setCaption] = useState("");
   const [deleting, setDeleting] = useState<AdminPhoto | null>(null);
+
+  // while motion clips render in the background, refresh the list so badges update
+  const rendering = list.data?.items.some((p) => !p.hasVideo && !p.videoFailed) ?? false;
+  useEffect(() => {
+    if (!rendering) return;
+    const id = window.setInterval(() => qc.invalidateQueries({ queryKey: ["photos"] }), 3000);
+    return () => window.clearInterval(id);
+  }, [rendering, qc]);
 
   const upload = useMutation({
     mutationFn: async (file: File) => {
@@ -169,6 +177,29 @@ function PagedGrid({
               className="size-full object-cover"
             />
           </div>
+          <span
+            className={`absolute top-2 left-2 flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold shadow-sm ${
+              p.hasVideo ? "bg-white/90 text-rose" : p.videoFailed ? "bg-rosedeep text-white" : "bg-ink/70 text-white"
+            }`}
+            title={
+              p.hasVideo
+                ? "Motion clip ready"
+                : p.videoFailed
+                  ? "The motion clip couldn't be made — the photo still zooms with a gentle pan"
+                  : "Rendering the motion clip…"
+            }
+          >
+            <span
+              className={
+                p.hasVideo
+                  ? "icon-[lucide--clapperboard] size-3"
+                  : p.videoFailed
+                    ? "icon-[lucide--circle-alert] size-3"
+                    : "icon-[lucide--loader-circle] size-3 animate-spin"
+              }
+            />
+            {p.hasVideo ? "clip" : p.videoFailed ? "clip failed" : "rendering"}
+          </span>
           <figcaption className="wrap truncate px-3 py-2 text-[13px] text-inksoft" data-multiline>
             {p.caption || "—"}
           </figcaption>

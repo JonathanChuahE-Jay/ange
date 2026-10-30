@@ -47,6 +47,9 @@ export const photos = sqliteTable("photos", {
   caption: text("caption").notNull().default(""),
   mime: text("mime").notNull(),
   data: blob("data", { mode: "buffer" }).notNull(),
+  /** auto-generated cinematic motion clip (mp4), null until rendered */
+  video: blob("video", { mode: "buffer" }),
+  videoMime: text("video_mime"),
   position: integer("position").notNull().default(0),
   createdAt: text("created_at").notNull(),
 });

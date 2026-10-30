@@ -1,7 +1,8 @@
-import { desc } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 import { db, ensureSeed } from "./db";
 import * as t from "./schema";
 import type { SiteContent } from "./types";
+import { ensurePhotoVideos } from "./photoVideo";
 
 /** Strip emoji / pictographs (the public page is emoji-free by design). */
 const EMOJI_RE =
@@ -49,7 +50,13 @@ function loadContent(): SiteContent {
     .from(t.timelineEvents)
     .orderBy(t.timelineEvents.position)
     .all();
-  const photoRows = db.select().from(t.photos).orderBy(t.photos.position).all();
+  // metadata only — never load image/video blobs for the page
+  const photoRows = db
+    .select({ id: t.photos.id, caption: t.photos.caption, hasVideo: sql<number>`${t.photos.video} IS NOT NULL` })
+    .from(t.photos)
+    .orderBy(t.photos.position)
+    .all();
+  ensurePhotoVideos(); // backfill clips for photos that predate this feature
   const chats = db.select().from(t.chatQuotes).orderBy(t.chatQuotes.position).all();
   const loveRows = db.select().from(t.loves).orderBy(t.loves.position).all();
   const quizRows = db.select().from(t.quizQuestions).orderBy(t.quizQuestions.position).all();
@@ -77,7 +84,7 @@ function loadContent(): SiteContent {
       id: e.id, date: e.date, title: e.title, description: e.description,
       emoji: e.emoji, position: e.position,
     })),
-    photos: photoRows.map((p) => ({ id: p.id, caption: p.caption })),
+    photos: photoRows.map((p) => ({ id: p.id, caption: p.caption, hasVideo: Boolean(p.hasVideo) })),
     chats: chats.map((c) => ({
       id: c.id, side: c.side === "partner" ? "partner" : "me",
       text: c.text, timeLabel: c.timeLabel, position: c.position,

@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import { BACKEND_VERSION } from "./src/lib/versions";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["better-sqlite3"],
+  serverExternalPackages: ["better-sqlite3", "ffmpeg-static"],
   async headers() {
     return [
       {
