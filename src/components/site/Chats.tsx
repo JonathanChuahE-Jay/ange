@@ -5,7 +5,7 @@ import QRCode from "qrcode";
 import { useEffect, useMemo, useState } from "react";
 import { whatsappLink, type ChatQuote } from "@/lib/types";
 import { SectionHeading } from "./SectionHeading";
-import { AnimatedList } from "@/components/kit/animated-list";
+import { WhatsAppPhone } from "./WhatsAppPhone";
 import { BorderBeam } from "@/components/kit/border-beam";
 import { MagicCard } from "@/components/kit/magic-card";
 
@@ -23,7 +23,6 @@ export function Chats({
   whatsappPhone: string;
 }) {
   if (chats.length === 0) return null;
-  const lastPartnerIdx = chats.reduce((acc, c, i) => (c.side === "partner" ? i : acc), -1);
 
   return (
     <section id="chats" className="relative scroll-mt-20 overflow-x-clip py-24">
@@ -40,93 +39,8 @@ export function Chats({
         />
 
         <div className="relative mt-16 flex flex-col items-center justify-center gap-10 md:flex-row md:gap-14">
-          {/* WhatsApp phone */}
-          <motion.div
-            initial={{ opacity: 0, y: 28, scale: 0.96 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-[min(78vw,290px)] shrink-0 overflow-hidden rounded-[2.6rem] border-[9px] border-ink bg-[#ECE5DD] shadow-[0_40px_80px_-30px_rgb(67_38_58/0.6)]"
-          >
-            <span aria-hidden className="absolute top-2.5 left-1/2 z-10 h-5.5 w-20 -translate-x-1/2 rounded-full bg-ink" />
-
-            {/* status bar */}
-            <div className="flex items-center justify-between bg-gradient-to-b from-[#075E54] to-[#054d44] px-7 pt-4 pb-2 text-white">
-              <span className="text-[12px] font-semibold">9:41</span>
-              <span className="flex items-center gap-1.5" aria-hidden>
-                <span className="icon-[lucide--signal] size-3.5" />
-                <span className="icon-[lucide--wifi] size-3.5" />
-                <span className="icon-[lucide--battery-full] size-4.5" />
-              </span>
-            </div>
-
-            {/* WhatsApp header */}
-            <div className="flex items-center gap-3 bg-[#075E54] px-4 pb-3 text-white">
-              <div className="flex size-10 items-center justify-center rounded-full bg-white/15 font-display text-lg">
-                {partnerName.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex flex-col">
-                <p className="text-sm font-bold">{partnerName}</p>
-                <p className="text-[11px] text-white/70">online</p>
-              </div>
-              <span className="icon-[simple-icons--whatsapp] ml-auto size-5 text-white/90" aria-hidden />
-            </div>
-
-            {/* messages — Magic UI AnimatedList pops them in one by one like a live chat */}
-            <div className="flex h-[min(70vh,36rem)] flex-col justify-end gap-2 overflow-hidden bg-[#ECE5DD] bg-[radial-gradient(rgb(7_94_84/0.06)_1px,transparent_1px)] bg-[size:14px_14px] p-3.5">
-              <span className="mx-auto mb-auto rounded-lg bg-white/80 px-3 py-1 text-[10px] font-bold tracking-wider text-inksoft/70 uppercase shadow-sm">
-                today
-              </span>
-              <AnimatedList order="append" startOnView delay={900} className="gap-2">
-                {chats.map((c, i) => (
-                  <div
-                    key={c.id}
-                    className={`flex w-full ${c.side === "me" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div className="relative max-w-[82%]">
-                      <p
-                        className={`wrap rounded-2xl px-3 py-2 text-[15px] leading-snug shadow-sm ${
-                          c.side === "me"
-                            ? "rounded-br-md bg-[#DCF8C6] text-[#111B21]"
-                            : "rounded-bl-md bg-white text-[#111B21]"
-                        }`}
-                        data-multiline
-                      >
-                        {c.text}
-                        <span className="ml-2 inline-flex translate-y-0.5 items-center gap-1 text-[10px] whitespace-nowrap text-inksoft/60">
-                          {c.timeLabel}
-                          {c.side === "me" && (
-                            <span className="icon-[lucide--check-check] size-3.5 text-[#34B7F1]" aria-hidden />
-                          )}
-                        </span>
-                      </p>
-                      {i === lastPartnerIdx && (
-                        <span
-                          aria-hidden
-                          className="absolute -bottom-2 left-2 flex rounded-full border border-[#ECE5DD] bg-white p-1 shadow-sm"
-                        >
-                          <span className="icon-[lucide--heart] block size-3 text-rose" />
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </AnimatedList>
-
-              {/* typing indicator */}
-              <div className="mt-1 flex items-center gap-2 self-start">
-                <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md bg-white px-4 py-3 shadow-sm">
-                  {[0, 1, 2].map((d) => (
-                    <span
-                      key={d}
-                      className="size-1.5 animate-bounce rounded-full bg-inksoft/50"
-                      style={{ animationDelay: `${d * 0.15}s` }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          {/* WhatsApp for iPhone — plays the conversation live */}
+          <WhatsAppPhone chats={chats} partnerName={partnerName} />
 
           {/* scan-to-reply QR card */}
           <ScanCard askerName={askerName} whatsappPhone={whatsappPhone} />
