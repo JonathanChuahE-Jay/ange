@@ -27,6 +27,7 @@ export async function GET(req: Request) {
         caption: t.photos.caption,
         mime: t.photos.mime,
         hasVideo: sql<number>`${t.photos.video} IS NOT NULL`,
+        videoSource: t.photos.videoSource,
         position: t.photos.position,
         createdAt: t.photos.createdAt,
       })
@@ -39,6 +40,7 @@ export async function GET(req: Request) {
     const items = rows.map((r) => ({
       ...r,
       hasVideo: Boolean(r.hasVideo),
+      videoSource: r.videoSource ?? null,
       videoPending: !r.hasVideo && isPhotoVideoPending(r.id),
       videoFailed: !r.hasVideo && isPhotoVideoFailed(r.id),
     }));

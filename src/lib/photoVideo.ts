@@ -96,7 +96,7 @@ export async function renderPhotoVideo(photoId: number): Promise<void> {
 
     const video = await readFile(output);
     // the photo may have been deleted while rendering — update is then a no-op
-    db.update(t.photos).set({ video, videoMime: "video/mp4" }).where(eq(t.photos.id, photoId)).run();
+    db.update(t.photos).set({ video, videoMime: "video/mp4", videoSource: "auto" }).where(eq(t.photos.id, photoId)).run();
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
@@ -146,6 +146,12 @@ export function ensurePhotoVideos() {
   } catch {
     // DB not ready (e.g. during build) — try again on the next request
   }
+}
+
+/** Re-queue even a previously failed render (used when a user video is removed). */
+export function retryPhotoVideo(photoId: number) {
+  Q.failed.delete(photoId);
+  enqueuePhotoVideo(photoId);
 }
 
 export function isPhotoVideoFailed(photoId: number) {

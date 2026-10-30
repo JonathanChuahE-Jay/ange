@@ -20,6 +20,8 @@ export const ERROR_CODES = [
   "content.photos.not_found",
   "content.photos.invalid",
   "upload.photo.too_large",
+  "upload.video.too_large",
+  "upload.video.unsupported_type",
   "upload.photo.unsupported_type",
   // chats
   "content.chats.not_found",
@@ -62,6 +64,8 @@ const STATUS_BY_CODE: Record<ErrorCode, number> = {
   "content.photos.not_found": 404,
   "content.photos.invalid": 400,
   "upload.photo.too_large": 413,
+  "upload.video.too_large": 413,
+  "upload.video.unsupported_type": 415,
   "upload.photo.unsupported_type": 415,
   "content.chats.not_found": 404,
   "content.chats.invalid": 400,

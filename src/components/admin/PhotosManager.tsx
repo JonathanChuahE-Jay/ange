@@ -10,17 +10,42 @@ import { EditorModal } from "./EditorModal";
 import { useResource } from "./useResource";
 import { TextField } from "@/components/ui/Field";
 
-type AdminPhoto = PhotoMeta & { mime: string; position: number; createdAt: string; videoPending?: boolean; videoFailed?: boolean };
+type AdminPhoto = PhotoMeta & { mime: string; position: number; createdAt: string; videoPending?: boolean; videoFailed?: boolean; videoSource?: "auto" | "user" | null };
 
 export function PhotosManager() {
   const qc = useQueryClient();
   const { toast } = useToast();
   const { list, remove } = useResource<AdminPhoto>("photos", "/api/admin/photos");
   const fileInput = useRef<HTMLInputElement>(null);
+  const videoInput = useRef<HTMLInputElement>(null);
+  const [videoTarget, setVideoTarget] = useState<AdminPhoto | null>(null);
+  const [removingVideo, setRemovingVideo] = useState<AdminPhoto | null>(null);
   const [uploading, setUploading] = useState(false);
   const [captioning, setCaptioning] = useState<AdminPhoto | null>(null);
   const [caption, setCaption] = useState("");
   const [deleting, setDeleting] = useState<AdminPhoto | null>(null);
+
+  const attachVideo = useMutation({
+    mutationFn: ({ id, file }: { id: number; file: File }) => {
+      const form = new FormData();
+      form.append("file", file);
+      return api.upload(`/api/admin/photos/${id}/video`, form);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["photos"] });
+      toast("Your video is attached — tapping the photo now plays it");
+    },
+    onError: (e) => toast(messageForCode((e as { code?: string }).code), "error"),
+  });
+
+  const removeVideo = useMutation({
+    mutationFn: (id: number) => api.send(`/api/admin/photos/${id}/video`, "DELETE"),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["photos"] });
+      toast("Removed — the auto motion clip will come back");
+    },
+    onError: (e) => toast(messageForCode((e as { code?: string }).code), "error"),
+  });
 
   // while motion clips render in the background, refresh the list so badges update
   const rendering = list.data?.items.some((p) => !p.hasVideo && !p.videoFailed) ?? false;
@@ -107,8 +132,27 @@ export function PhotosManager() {
             setCaption(p.caption);
           }}
           onDelete={setDeleting}
+          onAttachVideo={(p) => {
+            setVideoTarget(p);
+            videoInput.current?.click();
+          }}
+          onRemoveVideo={setRemovingVideo}
+          busyVideo={attachVideo.isPending}
         />
       )}
+
+      <input
+        ref={videoInput}
+        type="file"
+        accept="video/mp4,video/webm,video/quicktime,video/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file && videoTarget) attachVideo.mutate({ id: videoTarget.id, file });
+          e.target.value = "";
+          setVideoTarget(null);
+        }}
+      />
 
       <EditorModal
         open={captioning !== null}
@@ -132,6 +176,19 @@ export function PhotosManager() {
       </EditorModal>
 
       <ConfirmDialog
+        open={removingVideo !== null}
+        title="Remove your video?"
+        message="The auto-generated motion clip will be re-rendered for this photo instead."
+        confirmLabel="Remove"
+        danger
+        onConfirm={() => {
+          if (removingVideo) removeVideo.mutate(removingVideo.id);
+          setRemovingVideo(null);
+        }}
+        onCancel={() => setRemovingVideo(null)}
+      />
+
+      <ConfirmDialog
         open={deleting !== null}
         title="Delete this photo?"
         message="It will be gone forever — no take-backs."
@@ -152,11 +209,17 @@ function PagedGrid({
   uploading,
   onCaption,
   onDelete,
+  onAttachVideo,
+  onRemoveVideo,
+  busyVideo,
 }: {
   items: Paged<AdminPhoto>;
   uploading: boolean;
   onCaption: (p: AdminPhoto) => void;
   onDelete: (p: AdminPhoto) => void;
+  onAttachVideo: (p: AdminPhoto) => void;
+  onRemoveVideo: (p: AdminPhoto) => void;
+  busyVideo: boolean;
 }) {
   if (items.items.length === 0 && !uploading) {
     return (
@@ -179,12 +242,18 @@ function PagedGrid({
           </div>
           <span
             className={`absolute top-2 left-2 flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold shadow-sm ${
-              p.hasVideo ? "bg-white/90 text-rose" : p.videoFailed ? "bg-rosedeep text-white" : "bg-ink/70 text-white"
+              p.videoSource === "user"
+                ? "bg-rose text-white"
+                : p.hasVideo
+                  ? "bg-white/90 text-rose"
+                  : p.videoFailed ? "bg-rosedeep text-white" : "bg-ink/70 text-white"
             }`}
             title={
-              p.hasVideo
-                ? "Motion clip ready"
-                : p.videoFailed
+              p.videoSource === "user"
+                ? "Your video — plays when the photo is tapped"
+                : p.hasVideo
+                  ? "Auto-generated motion clip"
+                  : p.videoFailed
                   ? "The motion clip couldn't be made — the photo still zooms with a gentle pan"
                   : "Rendering the motion clip…"
             }
@@ -198,12 +267,31 @@ function PagedGrid({
                     : "icon-[lucide--loader-circle] size-3 animate-spin"
               }
             />
-            {p.hasVideo ? "clip" : p.videoFailed ? "clip failed" : "rendering"}
+            {p.videoSource === "user" ? "your video" : p.hasVideo ? "clip" : p.videoFailed ? "clip failed" : "rendering"}
           </span>
           <figcaption className="wrap truncate px-3 py-2 text-[13px] text-inksoft" data-multiline>
             {p.caption || "—"}
           </figcaption>
           <div className="absolute inset-x-0 top-0 flex justify-end gap-1 p-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+            <button
+              onClick={() => onAttachVideo(p)}
+              disabled={busyVideo}
+              aria-label={p.videoSource === "user" ? "Replace your video" : "Attach your video"}
+              title={p.videoSource === "user" ? "Replace your video" : "Attach your video (plays instead of the generated clip)"}
+              className="flex size-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rose disabled:opacity-50"
+            >
+              <span className="icon-[lucide--clapperboard] size-4" />
+            </button>
+            {p.videoSource === "user" && (
+              <button
+                onClick={() => onRemoveVideo(p)}
+                aria-label="Remove your video"
+                title="Remove your video — the generated clip comes back"
+                className="flex size-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rosedeep"
+              >
+                <span className="icon-[lucide--video-off] size-4" />
+              </button>
+            )}
             <button
               onClick={() => onCaption(p)}
               aria-label="Edit caption"

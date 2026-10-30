@@ -10,6 +10,8 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   "gate.locked": "This page is locked — enter our first day first.",
   "gate.date.wrong": "That's not our day. Try again.",
   "gate.rate_limited": "Too many tries — wait a few minutes.",
+  "upload.video.too_large": "That video is too big — keep it under 32 MB.",
+  "upload.video.unsupported_type": "That's not a video file — use MP4, WebM or MOV.",
   "content.settings.not_found": "Settings aren't initialized yet. Run mise run start once.",
   "content.settings.invalid": "Something in the settings looks off — check the fields.",
   "content.timeline.not_found": "That timeline moment doesn't exist anymore.",

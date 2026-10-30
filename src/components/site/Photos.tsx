@@ -312,6 +312,7 @@ function Cinema({
           <video
             ref={videoRef}
             src={`/api/photos/${photo.id}/video`}
+            poster={src}
             muted
             playsInline
             preload="auto"

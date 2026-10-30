@@ -46,6 +46,7 @@ export function AdminShell({
   const session = useQuery({
     queryKey: ["session"],
     queryFn: () => api.get<{ authenticated: boolean }>("/api/auth/session"),
+    staleTime: 0, // never trust a cached verdict — it decides the login redirect
   });
 
   const logout = useMutation({

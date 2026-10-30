@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
@@ -12,14 +12,17 @@ const schema = z.object({ password: z.string().min(1, "Type the password") });
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const qc = useQueryClient();
   const { toast } = useToast();
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string>();
 
   const login = useMutation({
     mutationFn: (pw: string) => api.send("/api/auth/session", "POST", { password: pw }),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast("Welcome back");
+      // drop any cached "not authenticated" result so /admin doesn't bounce back here
+      await qc.invalidateQueries({ queryKey: ["session"] });
       router.replace("/admin");
     },
     onError: (e) => setError(messageForCode((e as { code?: string }).code)),

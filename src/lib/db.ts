@@ -73,6 +73,16 @@ try {
       sqlite.pragma("user_version = 2");
     })();
   }
+  // v3: user-uploaded videos per photo
+  if (Number(sqlite.pragma("user_version", { simple: true }) ?? 0) < 3) {
+    sqlite.transaction(() => {
+      const cols = sqlite.prepare("PRAGMA table_info(photos)").all() as { name: string }[];
+      if (cols.length > 0 && !cols.some((c) => c.name === "video_source")) {
+        sqlite.exec("ALTER TABLE photos ADD COLUMN video_source text");
+      }
+      sqlite.pragma("user_version = 3");
+    })();
+  }
 } catch {
   // parallel build workers may race here; the next open retries
 }
