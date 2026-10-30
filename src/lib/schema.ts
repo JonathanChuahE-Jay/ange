@@ -10,9 +10,11 @@ export const settings = sqliteTable("settings", {
     .default("I made this little corner of the internet just for you."),
   yesResponse: text("yes_response")
     .notNull()
-    .default("Best. Answer. Ever. 💖 Scroll down — there's more for you."),
+    .default("Best. Answer. Ever. Scroll down — there's more for you."),
   noIsDodger: integer("no_is_dodger").notNull().default(1),
   whatsappPhone: text("whatsapp_phone").notNull().default(""),
+  /** "YYYY-MM-DD" — the day they became a couple; unlocks the public site */
+  anniversaryDate: text("anniversary_date").notNull().default(""),
   countdownTitle: text("countdown_title")
     .notNull()
     .default("Counting every second until…"),

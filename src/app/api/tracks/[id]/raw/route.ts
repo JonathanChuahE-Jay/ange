@@ -2,10 +2,12 @@ import { eq } from "drizzle-orm";
 import { db, ensureSeed } from "@/lib/db";
 import * as t from "@/lib/schema";
 import { route } from "@/lib/handlers";
+import { requireUnlocked } from "@/lib/gate";
 
 /** Stream an uploaded track; supports Range so <audio> can seek. */
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   return route(async () => {
+    await requireUnlocked();
     ensureSeed();
     const { id } = await params;
     const numId = Number(id);
@@ -35,7 +37,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
           "Content-Length": String(end - start + 1),
           "Content-Range": `bytes ${start}-${end}/${total}`,
           "Accept-Ranges": "bytes",
-          "Cache-Control": "public, max-age=86400",
+          "Cache-Control": "private, max-age=86400",
         },
       });
     }
@@ -45,7 +47,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         "Content-Type": row.mime,
         "Content-Length": String(total),
         "Accept-Ranges": "bytes",
-        "Cache-Control": "public, max-age=86400",
+        "Cache-Control": "private, max-age=86400",
       },
     });
   });

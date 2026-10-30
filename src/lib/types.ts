@@ -6,6 +6,7 @@ export type Settings = {
   yesResponse: string;
   noIsDodger: boolean;
   whatsappPhone: string;
+  anniversaryDate: string;
   countdownTitle: string;
   countdownTarget: string | null;
   letterTitle: string;

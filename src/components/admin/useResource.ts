@@ -24,7 +24,7 @@ export function useResource<T extends { id: number }>(key: string, base: string,
       qc.invalidateQueries({ queryKey: [key] });
       qc.invalidateQueries({ queryKey: ["overview"] });
       qc.invalidateQueries({ queryKey: ["site"] });
-      toast("Added ✨");
+      toast("Added");
     },
     onError,
   });
@@ -35,7 +35,7 @@ export function useResource<T extends { id: number }>(key: string, base: string,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [key] });
       qc.invalidateQueries({ queryKey: ["site"] });
-      toast("Saved ✨");
+      toast("Saved");
     },
     onError,
   });

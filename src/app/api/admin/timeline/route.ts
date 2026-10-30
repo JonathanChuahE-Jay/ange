@@ -6,7 +6,7 @@ const createSchema = z.object({
   date: z.string().trim().min(1).max(60),
   title: z.string().trim().min(1).max(120),
   description: z.string().trim().max(1000),
-  emoji: z.string().trim().min(1).max(8),
+  emoji: z.string().trim().max(8).default(""),
 });
 
 export const GET = listHandler({

@@ -46,9 +46,9 @@ export function Chats({
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-sm overflow-hidden rounded-[2.8rem] border-[10px] border-ink bg-[#ECE5DD] shadow-2xl"
+            className="relative w-[min(78vw,290px)] shrink-0 overflow-hidden rounded-[2.6rem] border-[9px] border-ink bg-[#ECE5DD] shadow-[0_40px_80px_-30px_rgb(67_38_58/0.6)]"
           >
-            <span aria-hidden className="absolute top-2.5 left-1/2 z-10 h-6 w-24 -translate-x-1/2 rounded-full bg-ink" />
+            <span aria-hidden className="absolute top-2.5 left-1/2 z-10 h-5.5 w-20 -translate-x-1/2 rounded-full bg-ink" />
 
             {/* status bar */}
             <div className="flex items-center justify-between bg-gradient-to-b from-[#075E54] to-[#054d44] px-7 pt-4 pb-2 text-white">
@@ -73,7 +73,7 @@ export function Chats({
             </div>
 
             {/* messages — Magic UI AnimatedList pops them in one by one like a live chat */}
-            <div className="flex h-[26rem] flex-col justify-end gap-2 overflow-hidden bg-[#ECE5DD] bg-[radial-gradient(rgb(7_94_84/0.06)_1px,transparent_1px)] bg-[size:14px_14px] p-3.5">
+            <div className="flex h-[min(70vh,36rem)] flex-col justify-end gap-2 overflow-hidden bg-[#ECE5DD] bg-[radial-gradient(rgb(7_94_84/0.06)_1px,transparent_1px)] bg-[size:14px_14px] p-3.5">
               <span className="mx-auto mb-auto rounded-lg bg-white/80 px-3 py-1 text-[10px] font-bold tracking-wider text-inksoft/70 uppercase shadow-sm">
                 today
               </span>
@@ -103,9 +103,9 @@ export function Chats({
                       {i === lastPartnerIdx && (
                         <span
                           aria-hidden
-                          className="absolute -bottom-1.5 left-2 rounded-full border border-[#ECE5DD] bg-white px-1.5 py-0.5 text-[11px] shadow-sm"
+                          className="absolute -bottom-2 left-2 flex rounded-full border border-[#ECE5DD] bg-white p-1 shadow-sm"
                         >
-                          ❤️
+                          <span className="icon-[lucide--heart] block size-3 text-rose" />
                         </span>
                       )}
                     </div>
@@ -137,7 +137,7 @@ export function Chats({
 }
 
 function ScanCard({ askerName, whatsappPhone }: { askerName: string; whatsappPhone: string }) {
-  const link = useMemo(() => whatsappLink(whatsappPhone, "Yes 💖"), [whatsappPhone]);
+  const link = useMemo(() => whatsappLink(whatsappPhone, "Yes"), [whatsappPhone]);
   const [qr, setQr] = useState<string | null>(null);
 
   useEffect(() => {

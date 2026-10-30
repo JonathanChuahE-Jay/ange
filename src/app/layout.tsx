@@ -14,7 +14,7 @@ const hand = Caveat({ subsets: ["latin"], variable: "--font-caveat" });
 const sans = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "For You 💖",
+  title: "For You",
   description: "A little corner of the internet, made with love.",
   robots: { index: false, follow: false },
 };

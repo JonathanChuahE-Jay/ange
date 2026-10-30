@@ -3,7 +3,7 @@ import * as t from "@/lib/schema";
 import { createHandler, listHandler } from "@/lib/resources";
 
 const createSchema = z.object({
-  emoji: z.string().trim().min(1).max(8),
+  emoji: z.string().trim().max(8).default(""),
   text: z.string().trim().min(1).max(120),
 });
 

@@ -34,7 +34,7 @@ export function PhotosManager() {
       qc.invalidateQueries({ queryKey: ["photos"] });
       qc.invalidateQueries({ queryKey: ["overview"] });
       qc.invalidateQueries({ queryKey: ["site"] });
-      toast("Photo added 📸");
+      toast("Photo added");
     },
     onError: (e) => toast(messageForCode((e as { code?: string }).code), "error"),
     onSettled: () => {
@@ -153,7 +153,7 @@ function PagedGrid({
   if (items.items.length === 0 && !uploading) {
     return (
       <p className="mt-6 rounded-2xl border border-dashed border-line bg-white px-5 py-8 text-center text-sm text-inksoft">
-        No photos yet — upload the first memory 📷
+        No photos yet — upload the first memory
       </p>
     );
   }

@@ -4,7 +4,7 @@ import { deleteHandler, updateHandler } from "@/lib/resources";
 
 const updateSchema = z.object({
   label: z.string().trim().min(1).max(80),
-  emoji: z.string().trim().min(1).max(8),
+  emoji: z.string().trim().max(8).default(""),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   weight: z.number().int().min(1).max(100),
 });

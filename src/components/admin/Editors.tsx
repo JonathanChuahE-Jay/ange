@@ -17,7 +17,7 @@ const timelineSchema = z.object({
   date: z.string().trim().min(1, "When? e.g. “March 2024”").max(60),
   title: z.string().trim().min(1, "Give it a title").max(120),
   description: z.string().trim().max(1000),
-  emoji: z.string().trim().min(1).max(8),
+  emoji: z.string().trim().max(8).default(""),
 });
 type TimelineForm = z.input<typeof timelineSchema>;
 
@@ -27,7 +27,7 @@ export function TimelineEditor() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [deleting, setDeleting] = useState<TimelineEvent | null>(null);
 
-  const blank: TimelineForm = { date: "", title: "", description: "", emoji: "✨" };
+  const blank: TimelineForm = { date: "", title: "", description: "", emoji: "" };
 
   const save = () => {
     const parsed = timelineSchema.safeParse(draft);
@@ -54,7 +54,6 @@ export function TimelineEditor() {
         onDelete={setDeleting}
         render={(e) => (
           <div className="flex items-center gap-3">
-            <span className="text-2xl" aria-hidden>{e.emoji}</span>
             <div className="min-w-0">
               <p className="truncate text-[12px] font-bold tracking-wider text-gold uppercase">{e.date}</p>
               <p className="truncate font-semibold text-ink">{e.title}</p>
@@ -74,7 +73,6 @@ export function TimelineEditor() {
           <div className="col-span-2">
             <TextField label="When" placeholder="e.g. March 2024" value={draft?.date ?? ""} error={errors.date} onChange={(e) => setDraft((d) => (d ? { ...d, date: e.target.value } : d))} />
           </div>
-          <TextField label="Emoji" value={draft?.emoji ?? "✨"} error={errors.emoji} onChange={(e) => setDraft((d) => (d ? { ...d, emoji: e.target.value } : d))} />
         </div>
         <TextField label="Title" value={draft?.title ?? ""} error={errors.title} onChange={(e) => setDraft((d) => (d ? { ...d, title: e.target.value } : d))} />
         <TextArea label="The story (optional)" value={draft?.description ?? ""} error={errors.description} onChange={(e) => setDraft((d) => (d ? { ...d, description: e.target.value } : d))} />
@@ -180,7 +178,7 @@ export function ChatsEditor() {
 /* ---------------- Loves ---------------- */
 
 const loveSchema = z.object({
-  emoji: z.string().trim().min(1).max(8),
+  emoji: z.string().trim().max(8).default(""),
   text: z.string().trim().min(1, "What do you love?").max(120),
 });
 type LoveForm = z.input<typeof loveSchema>;
@@ -211,12 +209,11 @@ export function LovesEditor() {
         hint="The little things that make you, you"
         items={list.data?.items}
         loading={list.isPending}
-        onAdd={() => setDraft({ emoji: "❤️", text: "" })}
+        onAdd={() => setDraft({ emoji: "", text: "" })}
         onEdit={(l) => setDraft({ id: l.id, emoji: l.emoji, text: l.text })}
         onDelete={setDeleting}
         render={(l) => (
           <div className="flex items-center gap-3">
-            <span className="text-2xl" aria-hidden>{l.emoji}</span>
             <p className="wrap font-semibold text-ink" data-multiline>{l.text}</p>
           </div>
         )}
@@ -229,7 +226,6 @@ export function LovesEditor() {
         onSave={save}
       >
         <div className="grid grid-cols-4 gap-3">
-          <TextField label="Emoji" value={draft?.emoji ?? "❤️"} error={errors.emoji} onChange={(e) => setDraft((d) => (d ? { ...d, emoji: e.target.value } : d))} />
           <div className="col-span-3">
             <TextField label="What is it?" value={draft?.text ?? ""} error={errors.text} onChange={(e) => setDraft((d) => (d ? { ...d, text: e.target.value } : d))} />
           </div>
@@ -252,7 +248,7 @@ export function LovesEditor() {
 
 const prizeSchema = z.object({
   label: z.string().trim().min(1, "Prize name").max(80),
-  emoji: z.string().trim().min(1).max(8),
+  emoji: z.string().trim().max(8).default(""),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Hex color like #D64560"),
   weight: z.coerce.number().int().min(1).max(100),
 });
@@ -286,13 +282,12 @@ export function PrizesEditor() {
         hint="Weight = how likely it is (1–100). 6–8 prizes look best."
         items={list.data?.items}
         loading={list.isPending}
-        onAdd={() => setDraft({ label: "", emoji: "🎁", color: PRIZE_COLORS[0], weight: 1 })}
+        onAdd={() => setDraft({ label: "", emoji: "", color: PRIZE_COLORS[0], weight: 1 })}
         onEdit={(p) => setDraft({ id: p.id, label: p.label, emoji: p.emoji, color: p.color, weight: p.weight })}
         onDelete={setDeleting}
         render={(p) => (
           <div className="flex items-center gap-3">
             <span className="size-5 shrink-0 rounded-full ring-2 ring-white" style={{ background: p.color }} aria-hidden />
-            <span className="text-2xl" aria-hidden>{p.emoji}</span>
             <div className="min-w-0">
               <p className="truncate font-semibold text-ink">{p.label}</p>
               <p className="text-[13px] text-inksoft">weight {p.weight}</p>
@@ -308,7 +303,6 @@ export function PrizesEditor() {
         onSave={save}
       >
         <div className="grid grid-cols-3 gap-3">
-          <TextField label="Emoji" value={draft?.emoji ?? "🎁"} error={errors.emoji} onChange={(e) => setDraft((d) => (d ? { ...d, emoji: e.target.value } : d))} />
           <div className="col-span-2">
             <TextField label="Prize" placeholder="Dinner date" value={draft?.label ?? ""} error={errors.label} onChange={(e) => setDraft((d) => (d ? { ...d, label: e.target.value } : d))} />
           </div>

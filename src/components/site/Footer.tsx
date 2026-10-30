@@ -1,7 +1,6 @@
 "use client";
 
 import ShinyText from "@/components/kit/ShinyText";
-import { BACKEND_VERSION, FRONTEND_VERSION } from "@/lib/versions";
 
 export function Footer({ askerName, partnerName }: { askerName: string; partnerName: string }) {
   return (
@@ -25,15 +24,6 @@ export function Footer({ askerName, partnerName }: { askerName: string; partnerN
           <span className="icon-[lucide--heart] inline-block size-5 animate-pulse align-middle text-rose" />{" "}
           <ShinyText text={`by ${askerName} for ${partnerName}`} color="#ffffff" shineColor="#F3C98B" speed={4} delay={0.4} />
         </p>
-        <p className="text-[12px] text-white/40">
-          frontend v{FRONTEND_VERSION} · backend v{BACKEND_VERSION}
-        </p>
-        <a
-          href="/admin"
-          className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3.5 py-1.5 text-[12px] text-white/40 transition-colors hover:border-white/25 hover:text-rosemist"
-        >
-          <span className="icon-[lucide--lock] size-3.5" /> admin
-        </a>
       </div>
     </footer>
   );

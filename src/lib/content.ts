@@ -3,8 +3,43 @@ import { db, ensureSeed } from "./db";
 import * as t from "./schema";
 import type { SiteContent } from "./types";
 
-/** Load everything the public page needs (photos as metadata only). */
-export function getSiteContent(): SiteContent {
+/** Strip emoji / pictographs (the public page is emoji-free by design). */
+const EMOJI_RE =
+  /[\p{Extended_Pictographic}\p{Regional_Indicator}\u{1F3FB}-\u{1F3FF}\u{FE0F}\u{200D}\u{20E3}]/gu;
+export function noEmoji(s: string): string {
+  return s.replace(EMOJI_RE, "").replace(/[ \t]{2,}/g, " ").replace(/ +([.,!?…])/g, "$1").trim();
+}
+
+/** Load everything the public page needs (photos as metadata only).
+ *  `raw: true` (admin) skips emoji stripping so edits round-trip. */
+export function getSiteContent({ raw = false }: { raw?: boolean } = {}): SiteContent {
+  const c = loadContent();
+  if (raw) return c;
+  const n = noEmoji;
+  return {
+    ...c,
+    settings: {
+      ...c.settings,
+      askerName: n(c.settings.askerName),
+      partnerName: n(c.settings.partnerName),
+      question: n(c.settings.question),
+      questionSubtext: n(c.settings.questionSubtext),
+      yesResponse: n(c.settings.yesResponse),
+      countdownTitle: n(c.settings.countdownTitle),
+      letterTitle: n(c.settings.letterTitle),
+      letterBody: c.settings.letterBody.replace(EMOJI_RE, ""),
+      letterSignoff: n(c.settings.letterSignoff),
+    },
+    timeline: c.timeline.map((e) => ({ ...e, emoji: "", date: n(e.date), title: n(e.title), description: n(e.description) })),
+    photos: c.photos.map((p) => ({ ...p, caption: n(p.caption) })),
+    chats: c.chats.map((x) => ({ ...x, text: n(x.text) })),
+    loves: c.loves.map((l) => ({ ...l, emoji: "", text: n(l.text) })),
+    tracks: c.tracks.map((x) => ({ ...x, title: n(x.title), artist: n(x.artist) })),
+    prizes: c.prizes.map((p) => ({ ...p, emoji: "", label: n(p.label) })),
+  };
+}
+
+function loadContent(): SiteContent {
   ensureSeed();
 
   const settingsRow = db.select().from(t.settings).limit(1).all()[0];
@@ -29,6 +64,7 @@ export function getSiteContent(): SiteContent {
       yesResponse: settingsRow?.yesResponse ?? "",
       noIsDodger: (settingsRow?.noIsDodger ?? 1) === 1,
       whatsappPhone: settingsRow?.whatsappPhone ?? "",
+      anniversaryDate: settingsRow?.anniversaryDate ?? "",
       countdownTitle: settingsRow?.countdownTitle ?? "",
       countdownTarget: settingsRow?.countdownTarget ?? null,
       letterTitle: settingsRow?.letterTitle ?? "",

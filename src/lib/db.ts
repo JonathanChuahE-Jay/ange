@@ -19,6 +19,16 @@ try {
   // another connection may hold the db (parallel build workers); WAL retries on next open
 }
 
+// lightweight forward migrations (drizzle-kit push needs a TTY for some diffs)
+try {
+  const cols = sqlite.prepare("PRAGMA table_info(settings)").all() as { name: string }[];
+  if (cols.length > 0 && !cols.some((c) => c.name === "anniversary_date")) {
+    sqlite.exec("ALTER TABLE settings ADD COLUMN anniversary_date text NOT NULL DEFAULT ''");
+  }
+} catch {
+  // table not created yet — drizzle-kit push will create it with the column
+}
+
 export const db = drizzle(sqlite, { schema });
 
 function placeholderPhoto(from: string, to: string, glyph: string, words: string) {

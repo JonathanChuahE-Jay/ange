@@ -21,6 +21,7 @@ const schema = z.object({
     .trim()
     .max(20)
     .regex(/^[+\d\s-]*$/, "Digits, spaces, + and - only"),
+  anniversaryDate: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/, "Pick a date"),
   countdownTitle: z.string().trim().min(1, "Required").max(120),
   countdownTarget: z.string(),
   letterTitle: z.string().trim().min(1, "Required").max(120),
@@ -51,6 +52,7 @@ export function StoryForm() {
         yesResponse: s.yesResponse,
         noIsDodger: s.noIsDodger,
         whatsappPhone: s.whatsappPhone ?? "",
+        anniversaryDate: s.anniversaryDate ?? "",
         countdownTitle: s.countdownTitle,
         countdownTarget: s.countdownTarget ?? "",
         letterTitle: s.letterTitle,
@@ -64,7 +66,7 @@ export function StoryForm() {
     mutationFn: (body: FormState) => api.send("/api/admin/settings", "PUT", body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["site"] });
-      toast("Saved 💖");
+      toast("Saved");
     },
     onError: (e) => toast(messageForCode((e as { code?: string }).code), "error"),
   });
@@ -133,6 +135,18 @@ export function StoryForm() {
       </fieldset>
 
       <fieldset className="rounded-2xl border border-line bg-white p-5">
+        <legend className="px-2 font-display text-lg text-ink">Secret door</legend>
+        <TextField
+          label="Our first day together (unlocks the site)"
+          type="date"
+          value={form.anniversaryDate}
+          error={errors.anniversaryDate}
+          hint="Visitors must enter this date before they can see anything. Changing it re-locks every device. While it's empty the site stays locked for everyone except you (logged-in admin)."
+          onChange={(e) => set("anniversaryDate", e.target.value)}
+        />
+      </fieldset>
+
+      <fieldset className="rounded-2xl border border-line bg-white p-5">
         <legend className="px-2 font-display text-lg text-ink">Countdown</legend>
         <div className="flex flex-col gap-4">
           <TextField label="Title" value={form.countdownTitle} error={errors.countdownTitle} onChange={(e) => set("countdownTitle", e.target.value)} />
@@ -161,7 +175,7 @@ export function StoryForm() {
           disabled={save.isPending}
           className="tap-spring btn-circle-drop min-h-12 rounded-full bg-rose px-8 font-bold text-white hover:bg-rosedeep disabled:opacity-60"
         >
-          {save.isPending ? "saving…" : "Save everything 💖"}
+          {save.isPending ? "saving…" : "Save everything"}
         </button>
       </div>
     </form>

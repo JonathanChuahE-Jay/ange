@@ -126,7 +126,7 @@ export function Countdown({ settings }: { settings: Settings }) {
     body = (
       <div className="flex max-w-md flex-col items-center gap-3 rounded-3xl border border-white/15 bg-white/5 px-10 py-10 text-center backdrop-blur-sm">
         <span className="icon-[lucide--moon-star] size-9 text-goldsoft" aria-hidden />
-        <p className="font-hand text-3xl text-white/90">a date is being picked… ✨</p>
+        <p className="font-hand text-3xl text-white/90">a date is being picked…</p>
         <p className="text-sm text-white/45">(it'll appear here the second it's set)</p>
       </div>
     );
@@ -134,7 +134,7 @@ export function Countdown({ settings }: { settings: Settings }) {
     body = (
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose via-rosedeep to-dusk2 px-10 py-12 text-center shadow-2xl">
         <div aria-hidden className="stars-layer absolute inset-0 opacity-60" />
-        <p className="relative font-display text-5xl text-white">It's today! 🎉</p>
+        <p className="relative font-display text-5xl text-white">It's today!</p>
         <p className="relative mt-3 text-white/85">
           {new Date(target!).toLocaleString(undefined, { dateStyle: "full", timeStyle: "short" })}
         </p>

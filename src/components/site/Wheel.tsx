@@ -141,17 +141,14 @@ export function Wheel({ prizes }: { prizes: Prize[] }) {
                         stroke="#FFF8F3"
                         strokeWidth={2.5}
                       />
-                      {/* emoji upright near the rim */}
+                      {/* small heart near the rim */}
                       <g transform={`rotate(${center} ${R} ${R})`}>
-                        <text
-                          x={R}
-                          y={R - R * 0.82}
-                          textAnchor="middle"
-                          fontSize={R * 0.115}
-                          dominantBaseline="middle"
-                        >
-                          {p.emoji}
-                        </text>
+                        <path
+                          transform={`translate(${R - 6} ${R - R * 0.76}) scale(0.5)`}
+                          d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"
+                          fill="#fff"
+                          opacity={0.85}
+                        />
                         {/* radial label — reads outward so it never stacks */}
                         <text
                           transform={`translate(${R} ${R - R * 0.44}) rotate(-90)`}
@@ -223,10 +220,10 @@ export function Wheel({ prizes }: { prizes: Prize[] }) {
                 initial={{ scale: 0, rotate: -20 }}
                 animate={{ scale: [0, 1.3, 1], rotate: 0 }}
                 transition={{ duration: 0.45, ease: [0.215, 0.61, 0.355, 1] }}
-                className="text-7xl"
+                className="flex size-20 items-center justify-center rounded-3xl bg-gradient-to-br from-rose to-rosedeep text-white shadow-[0_14px_30px_-10px_rgb(214_69_96/0.7)]"
                 aria-hidden
               >
-                {result.prize.emoji}
+                <span className="icon-[lucide--gift] size-10" />
               </motion.span>
               <DialogDescription className="mt-3 font-hand text-2xl text-gold">you won…</DialogDescription>
               <DialogTitle className="wrap mt-1 font-display text-4xl font-normal text-ink">
@@ -239,7 +236,7 @@ export function Wheel({ prizes }: { prizes: Prize[] }) {
                 shimmerColor="#FFE3EA"
                 className="tap-spring mt-6 min-h-12 px-8 font-bold"
               >
-                <span className="relative z-10">Claim it 💖</span>
+                <span className="relative z-10">Claim it</span>
               </ShimmerButton>
             </div>
           )}

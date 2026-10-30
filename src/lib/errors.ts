@@ -6,6 +6,10 @@ export const ERROR_CODES = [
   "auth.password.invalid",
   "auth.session.missing",
   "auth.session.expired",
+  // date gate (public site)
+  "gate.locked",
+  "gate.date.wrong",
+  "gate.rate_limited",
   // settings
   "content.settings.not_found",
   "content.settings.invalid",
@@ -45,6 +49,9 @@ const STATUS_BY_CODE: Record<ErrorCode, number> = {
   "auth.password.invalid": 401,
   "auth.session.missing": 401,
   "auth.session.expired": 401,
+  "gate.locked": 403,
+  "gate.date.wrong": 401,
+  "gate.rate_limited": 429,
   "content.settings.not_found": 500,
   "content.settings.invalid": 400,
   "content.timeline.not_found": 404,

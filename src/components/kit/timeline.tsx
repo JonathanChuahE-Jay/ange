@@ -78,13 +78,22 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
         })}
         <div
           style={{ height: height + "px" }}
-          className="absolute top-0 left-8 w-[2px] overflow-hidden bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-line to-transparent to-[99%] [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)]"
+          className="absolute top-0 left-8 w-[3px] overflow-hidden bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-line to-transparent to-[99%] [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)]"
         >
           <motion.div
             style={{ height: heightTransform, opacity: opacityTransform }}
-            className="absolute inset-x-0 top-0 w-[2px] rounded-full bg-gradient-to-t from-rose from-[0%] via-gold via-[12%] to-transparent shadow-[0_0_10px_rgb(214_69_96/0.6)]"
+            className="absolute inset-x-0 top-0 w-[3px] -ml-px rounded-full bg-gradient-to-t from-rose from-[0%] via-gold via-[12%] to-transparent shadow-[0_0_10px_rgb(214_69_96/0.6)]"
           />
         </div>
+        {/* comet: a glowing heart riding the tip of the beam */}
+        <motion.div
+          aria-hidden
+          style={{ y: heightTransform, opacity: opacityTransform }}
+          className="pointer-events-none absolute top-0 left-8 z-30 -mt-3 -ml-[11px] flex size-6 items-center justify-center"
+        >
+          <span className="absolute inset-0 animate-ping rounded-full bg-rose/40" />
+          <span className="icon-[lucide--heart] relative size-4 text-rose drop-shadow-[0_0_8px_rgb(214_69_96/0.9)]" />
+        </motion.div>
       </div>
     </div>
   );

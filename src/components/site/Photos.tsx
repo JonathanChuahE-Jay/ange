@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { PhotoMeta } from "@/lib/types";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/kit/dialog";
+import BlurText from "@/components/kit/BlurText";
 import { CardBody, CardContainer, CardItem } from "@/components/kit/3d-card";
 import { SectionHeading } from "./SectionHeading";
 
@@ -107,14 +108,14 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
           <button
             onClick={() => scrollBy(-1)}
             aria-label="Previous photos"
-            className="tap-spring absolute top-[45%] left-3 z-10 flex size-11 items-center justify-center rounded-full border border-line bg-white/90 text-rose shadow-lg backdrop-blur transition-transform hover:scale-110"
+            className="absolute top-[45%] left-3 z-10 flex size-11 items-center justify-center rounded-full border border-line bg-white/90 text-rose shadow-lg backdrop-blur transition-colors hover:bg-rose hover:text-white"
           >
             <span className="icon-[lucide--chevron-left] size-5" />
           </button>
           <button
             onClick={() => scrollBy(1)}
             aria-label="Next photos"
-            className="tap-spring absolute top-[45%] right-3 z-10 flex size-11 items-center justify-center rounded-full border border-line bg-white/90 text-rose shadow-lg backdrop-blur transition-transform hover:scale-110"
+            className="absolute top-[45%] right-3 z-10 flex size-11 items-center justify-center rounded-full border border-line bg-white/90 text-rose shadow-lg backdrop-blur transition-colors hover:bg-rose hover:text-white"
           >
             <span className="icon-[lucide--chevron-right] size-5" />
           </button>
@@ -125,6 +126,8 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
         {openIdx !== null && photos[openIdx] && (
           <Lightbox
             photo={photos[openIdx]}
+            index={openIdx}
+            total={photos.length}
             hasPrev={photos.length > 1}
             hasNext={photos.length > 1}
             onPrev={() => setOpenIdx((i) => (i === null ? i : (i - 1 + photos.length) % photos.length))}
@@ -139,6 +142,8 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
 
 function Lightbox({
   photo,
+  index,
+  total,
   hasPrev,
   hasNext,
   onPrev,
@@ -146,6 +151,8 @@ function Lightbox({
   onClose,
 }: {
   photo: PhotoMeta;
+  index: number;
+  total: number;
   hasPrev: boolean;
   hasNext: boolean;
   onPrev: () => void;
@@ -153,54 +160,70 @@ function Lightbox({
   onClose: () => void;
 }) {
   return (
-    <DialogContent className="max-w-2xl rounded-3xl border-line bg-bg p-5 sm:max-w-2xl md:p-6">
+    <DialogContent
+      showCloseButton={false}
+      className="max-w-2xl gap-0 rounded-3xl border-line bg-bg p-5 sm:max-w-2xl md:p-6"
+    >
       <DialogTitle className="sr-only">{photo.caption || "Photo"}</DialogTitle>
       <DialogDescription className="sr-only">Use the arrows to browse photos</DialogDescription>
-      <AnimatePresence mode="wait">
-      <motion.div
-        key={photo.id}
-        initial={{ opacity: 0, x: 24 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -24 }}
-        transition={{ duration: 0.22 }}
-        className="flex flex-col gap-4"
-      >
-        <div className="img-zoom-frame overflow-hidden rounded-2xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+
+      {/* fixed-size stage so nothing below it ever shifts between photos */}
+      <div className="relative h-[min(62vh,560px)] overflow-hidden rounded-2xl bg-rosemist/40">
+        <AnimatePresence initial={false}>
+          <motion.img
+            key={photo.id}
             src={`/api/photos/${photo.id}/raw`}
             alt={photo.caption || "a photo of us"}
-            className="max-h-[70vh] w-full object-contain"
+            initial={{ opacity: 0, scale: 1.04, filter: "blur(8px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.98, filter: "blur(6px)" }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-0 size-full object-contain"
           />
-        </div>
-        {photo.caption && (
-          <p className="wrap text-center font-hand text-2xl text-ink" data-multiline>
-            {photo.caption}
-          </p>
-        )}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={onPrev}
-            disabled={!hasPrev}
-            aria-label="Previous photo"
-            className="tap-spring flex size-11 items-center justify-center rounded-full bg-rosemist text-rose disabled:opacity-30"
-          >
-            <span className="icon-[lucide--chevron-left] size-5" />
-          </button>
+        </AnimatePresence>
+      </div>
+
+      {/* caption: letters blur in one by one (React Bits BlurText) */}
+      <div className="flex h-16 items-center justify-center overflow-hidden">
+        <BlurText
+          key={photo.id}
+          text={photo.caption || "us"}
+          trigger="load"
+          animateBy="letters"
+          effect="focus"
+          direction="bottom"
+          delay={18}
+          className="justify-center text-center font-hand text-2xl text-ink"
+        />
+      </div>
+
+      {/* static controls */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={onPrev}
+          disabled={!hasPrev}
+          aria-label="Previous photo"
+          className="flex size-11 items-center justify-center rounded-full bg-rosemist text-rose transition-colors hover:bg-rose hover:text-white disabled:opacity-30"
+        >
+          <span className="icon-[lucide--chevron-left] size-5" />
+        </button>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-[11px] font-bold tracking-[0.25em] text-inksoft/70 tabular-nums">
+            {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+          </span>
           <button onClick={onClose} className="text-sm font-semibold text-inksoft hover:text-rose">
             close
           </button>
-          <button
-            onClick={onNext}
-            disabled={!hasNext}
-            aria-label="Next photo"
-            className="tap-spring flex size-11 items-center justify-center rounded-full bg-rosemist text-rose disabled:opacity-30"
-          >
-            <span className="icon-[lucide--chevron-right] size-5" />
-          </button>
         </div>
-      </motion.div>
-      </AnimatePresence>
+        <button
+          onClick={onNext}
+          disabled={!hasNext}
+          aria-label="Next photo"
+          className="flex size-11 items-center justify-center rounded-full bg-rosemist text-rose transition-colors hover:bg-rose hover:text-white disabled:opacity-30"
+        >
+          <span className="icon-[lucide--chevron-right] size-5" />
+        </button>
+      </div>
     </DialogContent>
   );
 }

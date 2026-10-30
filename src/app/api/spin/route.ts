@@ -2,10 +2,12 @@ import { db, ensureSeed } from "@/lib/db";
 import * as t from "@/lib/schema";
 import { ApiError } from "@/lib/errors";
 import { route } from "@/lib/handlers";
+import { requireUnlocked } from "@/lib/gate";
 
 /** Server-side weighted spin so the result can't be fiddled with. */
 export async function POST() {
   return route(async () => {
+    await requireUnlocked();
     ensureSeed();
     const rows = db.select().from(t.prizes).orderBy(t.prizes.position).all();
     if (rows.length === 0) throw new ApiError("spin.prizes.empty");

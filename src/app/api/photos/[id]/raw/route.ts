@@ -2,12 +2,14 @@ import { eq } from "drizzle-orm";
 import { db, ensureSeed } from "@/lib/db";
 import * as t from "@/lib/schema";
 import { route } from "@/lib/handlers";
+import { requireUnlocked } from "@/lib/gate";
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   return route(async () => {
+    await requireUnlocked();
     ensureSeed();
     const { id } = await params;
     const numId = Number(id);
@@ -20,7 +22,7 @@ export async function GET(
     return new Response(bytes, {
       headers: {
         "Content-Type": row.mime,
-        "Cache-Control": "public, max-age=86400",
+        "Cache-Control": "private, max-age=86400",
       },
     });
   });

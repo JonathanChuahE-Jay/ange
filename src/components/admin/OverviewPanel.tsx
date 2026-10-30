@@ -48,7 +48,7 @@ export function OverviewPanel() {
         <p className="text-[13px] font-bold tracking-widest uppercase opacity-70">the answer</p>
         {data.yesAt ? (
           <>
-            <p className="mt-2 font-display text-4xl">She said YES 💖</p>
+            <p className="mt-2 font-display text-4xl">She said YES</p>
             <p className="mt-2 text-sm opacity-80">
               {new Date(data.yesAt).toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" })}
             </p>
@@ -58,7 +58,7 @@ export function OverviewPanel() {
             Latest answer: “{data.latestAnswer.answer}” — {new Date(data.latestAnswer.at).toLocaleString()}
           </p>
         ) : (
-          <p className="mt-2 font-display text-2xl">No answer yet — the suspense! 🥺</p>
+          <p className="mt-2 font-display text-2xl">No answer yet — the suspense!</p>
         )}
       </div>
 

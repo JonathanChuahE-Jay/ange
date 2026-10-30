@@ -19,7 +19,7 @@ export default function AdminLoginPage() {
   const login = useMutation({
     mutationFn: (pw: string) => api.send("/api/auth/session", "POST", { password: pw }),
     onSuccess: () => {
-      toast("Welcome back 💖");
+      toast("Welcome back");
       router.replace("/admin");
     },
     onError: (e) => setError(messageForCode((e as { code?: string }).code)),
@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
             disabled={login.isPending}
             className="tap-spring btn-circle-drop min-h-12 rounded-full bg-rose font-bold text-white hover:bg-rosedeep disabled:opacity-60"
           >
-            {login.isPending ? "checking…" : "Enter 💖"}
+            {login.isPending ? "checking…" : "Enter"}
           </button>
         </form>
         <a

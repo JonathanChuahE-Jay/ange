@@ -19,9 +19,9 @@ const NO_LABELS = [
   "No",
   "Are you sure?",
   "Really sure?",
-  "Think again 🤔",
+  "Think again",
   "Last chance!",
-  "You're breaking my heart 💔",
+  "You're breaking my heart",
   "Okay… the button is shy now",
 ];
 
@@ -47,7 +47,9 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
     answer.mutate("yes");
     // heart-shaped confetti bursts
     void import("canvas-confetti").then(({ default: confetti }) => {
-      const heart = confetti.shapeFromText({ text: "💖", scalar: 2.4 });
+      const heart = confetti.shapeFromPath({
+        path: "M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z",
+      });
       const burst = (x: number) =>
         confetti({
           particleCount: 45,
@@ -148,7 +150,7 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
                   {settings.yesResponse}
                 </p>
                 <p className="mt-3 text-sm text-white/60">
-                  {yesAt ? `Answered yes on ${new Date(yesAt).toLocaleDateString()} 💖` : ""}
+                  {yesAt ? `Answered yes on ${new Date(yesAt).toLocaleDateString()}` : ""}
                 </p>
               </motion.div>
             ) : (
@@ -160,7 +162,7 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
                   shimmerDuration="2.6s"
                   className="tap-spring min-h-14 px-12 text-lg font-bold shadow-[0_0_40px_rgb(214_69_96/0.55)] transition-shadow hover:shadow-[0_0_60px_rgb(214_69_96/0.8)]"
                 >
-                  <span className="relative z-10">Yes 💖</span>
+                  <span className="relative z-10 flex items-center gap-2">Yes <span className="icon-[lucide--heart] size-5" /></span>
                 </ShimmerButton>
                 <motion.button
                   onHoverStart={dodgeNo}

@@ -17,6 +17,11 @@ const bodySchema = z.object({
     .trim()
     .max(20)
     .regex(/^[+\d\s-]*$/, "digits, spaces, + and - only"),
+  anniversaryDate: z
+    .string()
+    .trim()
+    .regex(/^(\d{4}-\d{2}-\d{2})?$/, "use YYYY-MM-DD")
+    .refine((v) => v === "" || !Number.isNaN(Date.parse(v)), "invalid date"),
   countdownTitle: z.string().trim().min(1).max(120),
   countdownTarget: z
     .string()
@@ -44,6 +49,7 @@ export async function PUT(req: Request) {
         yesResponse: body.yesResponse,
         noIsDodger: body.noIsDodger ? 1 : 0,
         whatsappPhone: body.whatsappPhone,
+        anniversaryDate: body.anniversaryDate,
         countdownTitle: body.countdownTitle,
         countdownTarget: body.countdownTarget,
         letterTitle: body.letterTitle,
