@@ -38,6 +38,7 @@ export function Letter({ settings }: { settings: Settings }) {
   const envY = useMotionValue(0);
   const envOpacity = useMotionValue(1);
   const flapRot = useMotionValue(0);
+  const flapOpacity = useMotionValue(1);
   const sealOpacity = useMotionValue(1);
   const sealScale = useMotionValue(1);
 
@@ -101,6 +102,9 @@ export function Letter({ settings }: { settings: Settings }) {
     await Promise.all([
       animate(letterY, 0, { duration: 0.75, ease: EASE_OUT }),
       animate(envY, e * 0.3, { duration: 0.75, ease: EASE_OUT }),
+      // the open flap fades as the letter clears it — otherwise its corners
+      // (it's wider than the letter) would slide down beside the page as wedges
+      animate(flapOpacity, 0, { duration: 0.3, delay: 0.05 }),
     ]);
     celebrate({ x: 0.5, y: 0.45 });
     // 4. the envelope slides down off the letter, revealing the rest of the page
@@ -163,7 +167,7 @@ export function Letter({ settings }: { settings: Settings }) {
               {/* top flap (3D) — in front while closed, behind the letter once past 90° */}
               <motion.div
                 aria-hidden
-                style={{ top: envTop, height: env, opacity: envOpacity, perspective: 1200 }}
+                style={{ top: envTop, height: env, opacity: flapOpacity, perspective: 1200 }}
                 className={`pointer-events-none absolute inset-x-0 ${flapBehind ? "z-[15]" : "z-40"}`}
               >
                 <motion.div
@@ -175,10 +179,12 @@ export function Letter({ settings }: { settings: Settings }) {
                     className="absolute inset-0 bg-gradient-to-b from-[#EE9AAE] to-[#D9667F] [backface-visibility:hidden]"
                     style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }}
                   />
-                  {/* inside lining (seen once open) */}
+                  {/* inside lining (seen once open). This back face is counter-rotated with
+                      rotateX(180deg), so it's drawn apex-up: once the flap swings open it reads
+                      as a triangle pointing UP from the envelope's top edge. */}
                   <div
-                    className="absolute inset-0 bg-gradient-to-b from-[#F6DCE2] to-[#E9B7C3] [backface-visibility:hidden] [transform:rotateX(180deg)]"
-                    style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }}
+                    className="absolute inset-0 bg-gradient-to-t from-[#F6DCE2] to-[#E9B7C3] [backface-visibility:hidden] [transform:rotateX(180deg)]"
+                    style={{ clipPath: "polygon(0 100%, 100% 100%, 50% 0)" }}
                   />
                 </motion.div>
               </motion.div>
