@@ -64,7 +64,9 @@ export function Timeline({ events }: { events: TEvent[] }) {
           note="every chapter has you in it"
         />
 
-        <div ref={stackRef} className="relative mx-auto mt-14 max-w-3xl">
+        {/* pb = hold room below the last card: sticky can only pin while there is
+            container beneath it, so the final chapter holds the stack before leaving */}
+<div ref={stackRef} className="relative mx-auto mt-14 max-w-3xl">
           {events.map((e, i) => (
             <StackCard
               key={e.id}
@@ -74,6 +76,10 @@ export function Timeline({ events }: { events: TEvent[] }) {
               progress={scrollYProgress}
             />
           ))}
+          {/* sticky cards are confined to the container's CONTENT box (padding
+              doesn't count), so the hold room below the final card must be a
+              real flow element — otherwise the last chapter never pins */}
+          <div aria-hidden className="h-[30vh]" />
         </div>
       </div>
     </section>
@@ -106,7 +112,9 @@ function StackCard({
   return (
     // each wrapper is one viewport-ish tall so scrolling drives the stack
     <div
-      className={cn("sticky", isLast ? "pb-4" : "h-[58vh] min-h-[440px]")}
+      // every wrapper is the same height — the last card must have container
+      // below it, otherwise sticky has zero room and it never holds the stack
+      className="sticky h-[58vh] min-h-[440px]"
       style={{ top: STICK_TOP + i * PEEK }}
     >
       <motion.article
