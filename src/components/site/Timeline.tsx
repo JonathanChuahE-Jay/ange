@@ -1,9 +1,8 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform, type MotionValue } from "motion/react";
+import { useRef } from "react";
 import type { TimelineEvent as TEvent } from "@/lib/types";
-import { Timeline as AceternityTimeline } from "@/components/kit/timeline";
-import { MagicCard } from "@/components/kit/magic-card";
 import { DotPattern } from "@/components/kit/dot-pattern";
 import { cn } from "@/lib/utils";
 import { SectionHeading } from "./SectionHeading";
@@ -19,134 +18,42 @@ const ICONS = [
   "icon-[lucide--moon-star]",
 ];
 
-/** Two card moods alternate so the scroll has rhythm. */
-const MOODS = [
-  {
-    card: "bg-gradient-to-br from-white via-white to-rosemist",
-    badge: "from-rose to-rosedeep",
-    bar: "from-rose via-[#E8879C] to-gold",
-    glow: "#FBE9EE",
-  },
-  {
-    card: "bg-gradient-to-br from-white via-white to-goldsoft/60",
-    badge: "from-gold to-[#A87B2C]",
-    bar: "from-gold via-[#E8C27A] to-rose",
-    glow: "#FBF1DE",
-  },
+/** Card palettes cycle so each chapter in the stack reads as its own page. */
+const THEMES = [
+  { card: "from-[#FFF4F6] to-[#FBE3E9]", accent: "from-rose to-rosedeep", ink: "text-rosedeep" },
+  { card: "from-[#FFF9EF] to-[#F6E7C9]", accent: "from-gold to-[#A87B2C]", ink: "text-[#9A6F25]" },
+  { card: "from-[#FBF2FA] to-[#EFDDF0]", accent: "from-[#B34A8A] to-[#7E2F63]", ink: "text-[#7E2F63]" },
+  { card: "from-[#FFF5F1] to-[#F9E0D6]", accent: "from-[#E07A5F] to-[#B8553E]", ink: "text-[#A24B37]" },
 ];
 
-/** Timeline — Aceternity sticky timeline (scroll beam, comet heart, lit
- *  nodes) with layered Magic UI spotlight cards. */
+const STICK_TOP = 96; // px from the viewport top where cards pin
+const PEEK = 14; // each pinned card sits this much lower than the previous one
+
+/**
+ * Timeline — a sticky card stack. Each chapter pins near the top while the
+ * next one slides up over it; buried cards shrink and dim a little, so the
+ * story piles up like pages of a scrapbook.
+ */
 export function Timeline({ events }: { events: TEvent[] }) {
+  const stackRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: stackRef, offset: ["start start", "end end"] });
+
   if (events.length === 0) return null;
   const total = events.length;
-
-  const data = events.map((e, i) => {
-    const mood = MOODS[i % MOODS.length];
-    return {
-      key: e.id,
-      title: (
-        <motion.div
-          initial={{ opacity: 0, x: -16 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col items-start"
-        >
-          <span className="text-[11px] font-bold tracking-[0.35em] text-rose/80 uppercase">
-            chapter {String(i + 1).padStart(2, "0")}
-          </span>
-          <span className="wrap mt-1 bg-gradient-to-r from-rosedeep via-rose to-gold bg-clip-text font-display text-3xl leading-tight text-transparent italic md:text-[2.6rem]">
-            {e.date}
-          </span>
-        </motion.div>
-      ),
-      content: (
-        <motion.div
-          initial={{ opacity: 0, y: 40, rotateX: 14, scale: 0.96 }}
-          whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          style={{ transformPerspective: 900 }}
-          className="group relative"
-        >
-          {/* offset paper layer behind the card */}
-          <div
-            aria-hidden
-            className={cn(
-              "absolute inset-0 translate-x-2 translate-y-2 rounded-3xl bg-gradient-to-br opacity-25 transition-transform duration-500 group-hover:translate-x-3 group-hover:translate-y-3",
-              mood.bar,
-            )}
-          />
-          <MagicCard
-            className={cn("rounded-3xl shadow-[0_24px_50px_-28px_rgb(176_48_82/0.55)]", mood.card)}
-            gradientColor={mood.glow}
-            gradientOpacity={0.9}
-            gradientFrom="#D64560"
-            gradientTo="#C9973F"
-            gradientSize={280}
-          >
-            <div className={cn("h-1.5 w-full bg-gradient-to-r", mood.bar)} />
-            <div className="relative overflow-hidden p-6 md:p-8">
-              {/* watermark */}
-              <span
-                aria-hidden
-                className={cn(
-                  ICONS[i % ICONS.length],
-                  "pointer-events-none absolute -right-6 -bottom-6 size-36 rotate-12 text-rose/[0.07] transition-transform duration-700 group-hover:scale-110 group-hover:rotate-0",
-                )}
-              />
-              <div className="flex items-center gap-3">
-                <span
-                  className={cn(
-                    "flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-[0_10px_20px_-8px_rgb(176_48_82/0.6)] transition-transform duration-500 group-hover:-rotate-6",
-                    mood.badge,
-                  )}
-                >
-                  <span className={cn(ICONS[i % ICONS.length], "size-5")} />
-                </span>
-                <h3 className="wrap font-display text-2xl leading-tight text-ink md:text-[2rem]">{e.title}</h3>
-              </div>
-              {e.description && (
-                <p className="wrap mt-4 font-hand text-[1.45rem] leading-snug text-inksoft md:text-[1.6rem]" data-multiline>
-                  {e.description}
-                </p>
-              )}
-              <div className="mt-6 flex items-center gap-3">
-                <span className="text-[11px] font-bold tracking-[0.25em] text-inksoft/60 uppercase tabular-nums">
-                  {i + 1} of {total}
-                </span>
-                <span className="h-1 flex-1 overflow-hidden rounded-full bg-line">
-                  <motion.span
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${((i + 1) / total) * 100}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className={cn("block h-full rounded-full bg-gradient-to-r", mood.bar)}
-                  />
-                </span>
-              </div>
-            </div>
-          </MagicCard>
-        </motion.div>
-      ),
-    };
-  });
 
   return (
     <section
       id="timeline"
-      className="relative w-full scroll-mt-20 overflow-x-clip bg-gradient-to-b from-bg via-rosemist/70 to-bg px-5 py-24"
+      className="relative w-full scroll-mt-20 bg-gradient-to-b from-bg via-rosemist/60 to-bg px-5 pt-24 pb-16"
     >
       <DotPattern
         width={22}
         height={22}
-        className="text-rose/25 [mask-image:radial-gradient(ellipse_at_center,white,transparent_75%)]"
+        className="text-rose/20 [mask-image:radial-gradient(ellipse_at_top,white,transparent_70%)]"
       />
-      <div aria-hidden className="pointer-events-none absolute inset-0">
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="blob top-16 left-[-5rem] size-80 bg-rosesoft" style={{ animationDuration: "14s" }} />
         <div className="blob top-1/2 right-[-6rem] size-96 bg-goldsoft/80" style={{ animationDuration: "18s" }} />
-        <div className="blob bottom-10 left-1/3 size-72 bg-rosesoft/70" style={{ animationDuration: "20s" }} />
       </div>
 
       <div className="relative">
@@ -156,21 +63,100 @@ export function Timeline({ events }: { events: TEvent[] }) {
           icon="icon-[lucide--book-heart]"
           note="every chapter has you in it"
         />
-        <div className="mt-8">
-          <AceternityTimeline data={data} />
+
+        <div ref={stackRef} className="relative mx-auto mt-14 max-w-3xl">
+          {events.map((e, i) => (
+            <StackCard
+              key={e.id}
+              event={e}
+              index={i}
+              total={total}
+              progress={scrollYProgress}
+            />
+          ))}
         </div>
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto mt-4 flex max-w-5xl items-center justify-center gap-3 font-hand text-3xl text-rose"
-        >
-          <span className="h-px w-12 bg-gradient-to-r from-transparent to-rose/50" />
-          to be continued…
-          <span className="h-px w-12 bg-gradient-to-l from-transparent to-rose/50" />
-        </motion.p>
       </div>
     </section>
+  );
+}
+
+function StackCard({
+  event: e,
+  index: i,
+  total,
+  progress,
+}: {
+  event: TEvent;
+  index: number;
+  total: number;
+  progress: MotionValue<number>;
+}) {
+  const theme = THEMES[i % THEMES.length];
+  const icon = ICONS[i % ICONS.length];
+
+  // once later cards slide over this one, gently push it back
+  const isLast = i === total - 1;
+  // only start receding once the NEXT chapter is sliding over this one
+  const coveredFrom = Math.min(1, (i + 0.55) / total);
+  const coveredBy = Math.min(1, (i + 1) / total);
+  const targetScale = 1 - (total - 1 - i) * 0.035;
+  const scale = useTransform(progress, [coveredFrom, 1], [1, isLast ? 1 : targetScale]);
+  const dim = useTransform(progress, [coveredFrom, coveredBy], [0, isLast ? 0 : 0.08]);
+
+  return (
+    // each wrapper is one viewport-ish tall so scrolling drives the stack
+    <div
+      className={cn("sticky", isLast ? "pb-4" : "h-[58vh] min-h-[440px]")}
+      style={{ top: STICK_TOP + i * PEEK }}
+    >
+      <motion.article
+        style={{ scale, transformOrigin: "top center" }}
+        initial={{ opacity: 0, y: 60 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className={cn(
+          "group relative overflow-hidden rounded-[2rem] border border-white/70 bg-gradient-to-br shadow-[0_30px_70px_-35px_rgb(67_38_58/0.55)]",
+          theme.card,
+        )}
+      >
+        {/* large faint icon as texture */}
+        <span
+          aria-hidden
+          className={cn(icon, "pointer-events-none absolute -top-8 -right-8 size-56 rotate-12 opacity-[0.07]", theme.ink)}
+        />
+
+        <div className="relative flex min-h-[340px] flex-col p-7 md:min-h-[380px] md:p-12">
+          <div className="flex items-center gap-3">
+            <span
+              className={cn(
+                "flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-[0_12px_24px_-10px_rgb(67_38_58/0.6)]",
+                theme.accent,
+              )}
+            >
+              <span className={cn(icon, "size-6")} />
+            </span>
+            <span className={cn("text-[12px] font-bold tracking-[0.3em] uppercase", theme.ink)}>
+              {e.date}
+            </span>
+          </div>
+
+          <h3 className="wrap mt-8 font-display text-[clamp(2rem,5vw,3.4rem)] leading-[1.08] text-ink">
+            {e.title}
+          </h3>
+
+          {e.description && (
+            <p className="wrap mt-5 max-w-xl font-hand text-[1.6rem] leading-snug text-inksoft md:text-[1.85rem]" data-multiline>
+              {e.description}
+            </p>
+          )}
+
+          <span aria-hidden className={cn("icon-[lucide--heart] mt-auto size-6 pt-8 opacity-60", theme.ink)} />
+        </div>
+
+        {/* dims as it gets buried under the next chapter */}
+        <motion.div aria-hidden style={{ opacity: dim }} className="pointer-events-none absolute inset-0 bg-ink" />
+      </motion.article>
+    </div>
   );
 }

@@ -15,6 +15,12 @@ const TILTS = ["-rotate-2", "rotate-2", "-rotate-1", "rotate-3", "-rotate-3", "r
  *  lightbox: modals/spring-pop. */
 export function Photos({ photos }: { photos: PhotoMeta[] }) {
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+  // +1 = going forward (new photo enters from the right), -1 = backward
+  const [dir, setDir] = useState<1 | -1>(1);
+  const go = (d: 1 | -1) => {
+    setDir(d);
+    setOpenIdx((i) => (i === null ? i : (i + d + photos.length) % photos.length));
+  };
   const scroller = useRef<HTMLDivElement>(null);
 
   const scrollBy = (dir: 1 | -1) => {
@@ -26,9 +32,8 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
   useEffect(() => {
     if (openIdx === null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") setOpenIdx((i) => (i === null ? i : (i + 1) % photos.length));
-      if (e.key === "ArrowLeft")
-        setOpenIdx((i) => (i === null ? i : (i - 1 + photos.length) % photos.length));
+      if (e.key === "ArrowRight") go(1);
+      if (e.key === "ArrowLeft") go(-1);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -130,8 +135,9 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
             total={photos.length}
             hasPrev={photos.length > 1}
             hasNext={photos.length > 1}
-            onPrev={() => setOpenIdx((i) => (i === null ? i : (i - 1 + photos.length) % photos.length))}
-            onNext={() => setOpenIdx((i) => (i === null ? i : (i + 1) % photos.length))}
+            dir={dir}
+            onPrev={() => go(-1)}
+            onNext={() => go(1)}
             onClose={() => setOpenIdx(null)}
           />
         )}
@@ -140,10 +146,17 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
   );
 }
 
+const SLIDE = {
+  enter: (d: 1 | -1) => ({ x: d > 0 ? "100%" : "-100%", opacity: 0.4 }),
+  center: { x: "0%", opacity: 1 },
+  exit: (d: 1 | -1) => ({ x: d > 0 ? "-100%" : "100%", opacity: 0.4 }),
+};
+
 function Lightbox({
   photo,
   index,
   total,
+  dir,
   hasPrev,
   hasNext,
   onPrev,
@@ -153,6 +166,7 @@ function Lightbox({
   photo: PhotoMeta;
   index: number;
   total: number;
+  dir: 1 | -1;
   hasPrev: boolean;
   hasNext: boolean;
   onPrev: () => void;
@@ -169,15 +183,18 @@ function Lightbox({
 
       {/* fixed-size stage so nothing below it ever shifts between photos */}
       <div className="relative h-[min(62vh,560px)] overflow-hidden rounded-2xl bg-rosemist/40">
-        <AnimatePresence initial={false}>
+        {/* carousel slide: the new photo pushes the old one out in the travel direction */}
+        <AnimatePresence initial={false} custom={dir}>
           <motion.img
             key={photo.id}
+            custom={dir}
+            variants={SLIDE}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ x: { type: "spring", stiffness: 320, damping: 34 }, opacity: { duration: 0.2 } }}
             src={`/api/photos/${photo.id}/raw`}
             alt={photo.caption || "a photo of us"}
-            initial={{ opacity: 0, scale: 1.04, filter: "blur(8px)" }}
-            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-            exit={{ opacity: 0, scale: 0.98, filter: "blur(6px)" }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0 size-full object-contain"
           />
         </AnimatePresence>

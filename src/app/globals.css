@@ -173,7 +173,7 @@ body {
   color: var(--ink);
   font-family: var(--font-sans, Inter, sans-serif);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Convention: no default wrapping — opt in with .wrap */
