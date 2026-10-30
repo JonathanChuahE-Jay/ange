@@ -35,6 +35,8 @@ export type ChatQuote = {
   side: "me" | "partner";
   text: string;
   timeLabel: string;
+  /** ms to wait after the previous message before this one appears */
+  delayMs: number;
   position: number;
 };
 

@@ -61,6 +61,8 @@ export const chatQuotes = sqliteTable("chat_quotes", {
   side: text("side").notNull().default("me"), // 'me' | 'partner'
   text: text("text").notNull(),
   timeLabel: text("time_label").notNull().default(""),
+  /** ms to wait after the previous message before this one appears */
+  delayMs: integer("delay_ms").notNull().default(900),
   position: integer("position").notNull().default(0),
   createdAt: text("created_at").notNull(),
 });

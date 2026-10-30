@@ -83,6 +83,16 @@ try {
       sqlite.pragma("user_version = 3");
     })();
   }
+  // v4: per-message delay in the WhatsApp playback
+  if (Number(sqlite.pragma("user_version", { simple: true }) ?? 0) < 4) {
+    sqlite.transaction(() => {
+      const cols = sqlite.prepare("PRAGMA table_info(chat_quotes)").all() as { name: string }[];
+      if (cols.length > 0 && !cols.some((c) => c.name === "delay_ms")) {
+        sqlite.exec("ALTER TABLE chat_quotes ADD COLUMN delay_ms integer NOT NULL DEFAULT 900");
+      }
+      sqlite.pragma("user_version = 4");
+    })();
+  }
 } catch {
   // parallel build workers may race here; the next open retries
 }

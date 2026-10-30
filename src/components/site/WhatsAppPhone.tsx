@@ -80,29 +80,43 @@ export function WhatsAppPhone({ chats, partnerName }: { chats: ChatQuote[]; part
       await wait(700);
       for (let i = 0; i < chats.length && alive; i++) {
         const c = chats[i];
+        // Per-message delay: this message lands `delayMs` after the PREVIOUS one
+        // appeared. The typing indicator / keystrokes happen inside that window,
+        // so the total pace matches exactly what you set in admin.
+        const gap = Math.max(0, Math.min(60_000, c.delayMs ?? 900));
+        const instant = gap < 250;
+
         if (c.side === "partner") {
           markRead(); // she opened the chat → your ticks turn blue
-          setTyping(true);
-          await wait(Math.min(2200, Math.max(900, 500 + c.text.length * 32)));
-          if (!alive) return;
-          setTyping(false);
-          setShown(i + 1);
-          await wait(650);
-        } else {
-          // you type it into the input bar, then send
-          const step = Math.min(55, Math.max(18, 1100 / Math.max(1, c.text.length)));
-          for (let k = 1; k <= c.text.length && alive; k++) {
-            setDraft(c.text.slice(0, k));
-            await wait(step);
+          if (instant) {
+            setShown(i + 1);
+          } else {
+            await wait(gap * 0.25);
+            setTyping(true);
+            await wait(gap * 0.75);
+            if (!alive) return;
+            setTyping(false);
+            setShown(i + 1);
           }
-          await wait(280);
-          if (!alive) return;
-          setDraft("");
-          setShown(i + 1);
-          setTicks((t) => ({ ...t, [i]: 1 }));
-          await wait(450);
-          setTicks((t) => ({ ...t, [i]: 2 }));
-          await wait(500);
+        } else {
+          // you type it into the input bar, then it sends
+          if (instant) {
+            setShown(i + 1);
+          } else {
+            const step = Math.min(60, Math.max(16, (gap * 0.85) / Math.max(1, c.text.length)));
+            for (let k = 1; k <= c.text.length && alive; k++) {
+              setDraft(c.text.slice(0, k));
+              await wait(step);
+            }
+            const typed = c.text.length * step;
+            if (typed < gap * 0.85) await wait(gap * 0.85 - typed);
+            if (!alive) return;
+            setDraft("");
+            setShown(i + 1);
+            setTicks((t) => ({ ...t, [i]: 1 }));
+            await wait(200);
+            setTicks((t) => ({ ...t, [i]: 2 }));
+          }
         }
       }
       await wait(900);

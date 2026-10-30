@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { useResource } from "./useResource";
 import { ResourceList } from "./ResourceList";
 import { EditorModal } from "./EditorModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { TextArea, TextField } from "@/components/ui/Field";
+import { ChatList } from "./ChatList";
+import { api, messageForCode } from "@/lib/api";
+import { useToast } from "@/components/ui/Toast";
 import type { ChatQuote, Love, Prize, TimelineEvent } from "@/lib/types";
 
 type Draft = { id?: number };
@@ -96,14 +100,23 @@ const chatSchema = z.object({
   side: z.enum(["me", "partner"]),
   text: z.string().trim().min(1, "What did they say?").max(500),
   timeLabel: z.string().trim().max(20),
+  delayMs: z.number().int().min(0, "0 ms or more").max(60_000),
 });
 type ChatForm = z.input<typeof chatSchema>;
 
 export function ChatsEditor() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
   const { list, create, update, remove } = useResource<ChatQuote>("chats", "/api/admin/chats");
   const [draft, setDraft] = useState<(Draft & ChatForm) | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [deleting, setDeleting] = useState<ChatQuote | null>(null);
+
+  const reorder = useMutation({
+    mutationFn: (ids: number[]) => api.send("/api/admin/chats/reorder", "PUT", { ids }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["chats"] }),
+    onError: (e) => toast(messageForCode((e as { code?: string }).code), "error"),
+  });
 
   const save = () => {
     const parsed = chatSchema.safeParse(draft);
@@ -120,21 +133,42 @@ export function ChatsEditor() {
 
   return (
     <>
-      <ResourceList
-        title="Chat quotes"
-        hint="Receipts of the cutest conversations"
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-2xl text-ink">Chat quotes</h2>
+          <p className="mt-0.5 text-[13px] text-inksoft">
+            Drag the handle to reorder — this is the order the messages play in the phone
+          </p>
+        </div>
+        <button
+          onClick={() => setDraft({ side: "me", text: "", timeLabel: "", delayMs: 900 })}
+          className="tap-spring btn-circle-drop inline-flex min-h-10 items-center gap-2 rounded-full bg-rose px-5 text-sm font-bold text-white hover:bg-rosedeep"
+        >
+          <span className="icon-[lucide--plus] size-4" /> Add
+        </button>
+      </div>
+
+      <ChatList
         items={list.data?.items}
         loading={list.isPending}
-        onAdd={() => setDraft({ side: "me", text: "", timeLabel: "" })}
-        onEdit={(c) => setDraft({ id: c.id, side: c.side, text: c.text, timeLabel: c.timeLabel })}
+        onEdit={(c) =>
+          setDraft({ id: c.id, side: c.side, text: c.text, timeLabel: c.timeLabel, delayMs: c.delayMs ?? 900 })
+        }
         onDelete={setDeleting}
+        onReorder={(ids) => reorder.mutate(ids)}
         render={(c) => (
           <div className={`flex flex-col ${c.side === "me" ? "items-end" : "items-start"}`}>
             <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold uppercase ${c.side === "me" ? "bg-rose/10 text-rose" : "bg-goldsoft text-gold"}`}>
               {c.side === "me" ? "you" : "them"}
             </span>
             <p className="wrap mt-1 text-[15px] text-ink" data-multiline>{c.text}</p>
-            {c.timeLabel && <span className="text-[11px] text-inksoft/70">{c.timeLabel}</span>}
+            <span className="mt-1 flex items-center gap-2 text-[11px] text-inksoft/70">
+              {c.timeLabel && <span>{c.timeLabel}</span>}
+              <span className="inline-flex items-center gap-1 rounded-full bg-rosemist px-2 py-0.5 font-semibold text-rose">
+                <span className="icon-[lucide--timer] size-3" />
+                {((c.delayMs ?? 900) / 1000).toFixed(1)}s delay
+              </span>
+            </span>
           </div>
         )}
       />
@@ -160,6 +194,30 @@ export function ChatsEditor() {
           ))}
         </div>
         <TextArea label="Message" value={draft?.text ?? ""} error={errors.text} onChange={(e) => setDraft((d) => (d ? { ...d, text: e.target.value } : d))} />
+        <div className="flex flex-col gap-2">
+          <label className="text-[13px] font-semibold text-inksoft" htmlFor="chat-delay">
+            Wait before this message appears
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              id="chat-delay"
+              type="range"
+              min={0}
+              max={8000}
+              step={100}
+              value={draft?.delayMs ?? 900}
+              onChange={(e) => setDraft((d) => (d ? { ...d, delayMs: Number(e.target.value) } : d))}
+              className="h-2 flex-1 cursor-pointer appearance-none rounded-full bg-line accent-rose"
+            />
+            <span className="w-16 text-right text-sm font-bold text-ink tabular-nums">
+              {((draft?.delayMs ?? 900) / 1000).toFixed(1)}s
+            </span>
+          </div>
+          <p className="text-[12px] text-inksoft/80">
+            The pause after the previous message — 0s shows it instantly, longer makes the chat feel
+            like a real conversation.
+          </p>
+        </div>
         <TextField label="Time label (optional)" placeholder="2:14 am" value={draft?.timeLabel ?? ""} error={errors.timeLabel} onChange={(e) => setDraft((d) => (d ? { ...d, timeLabel: e.target.value } : d))} />
       </EditorModal>
       <ConfirmDialog

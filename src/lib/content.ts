@@ -87,7 +87,7 @@ function loadContent(): SiteContent {
     photos: photoRows.map((p) => ({ id: p.id, caption: p.caption, hasVideo: Boolean(p.hasVideo) })),
     chats: chats.map((c) => ({
       id: c.id, side: c.side === "partner" ? "partner" : "me",
-      text: c.text, timeLabel: c.timeLabel, position: c.position,
+      text: c.text, timeLabel: c.timeLabel, delayMs: c.delayMs, position: c.position,
     })),
     loves: loveRows.map((l) => ({ id: l.id, emoji: l.emoji, text: l.text })),
     quiz: quizRows.map((q) => {
