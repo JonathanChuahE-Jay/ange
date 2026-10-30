@@ -1,0 +1,19 @@
+{
+  "migrated_version": "3.0.0",
+  "finalized": false,
+  "appliedAt": "2026-10-29T14:51:27.643Z",
+  "log": [
+    {
+      "action": "skipped:missing",
+      "from": "/mnt/e/Projects/Personal Projects/ange/.unipi/config/compactor.json"
+    },
+    {
+      "action": "skipped:missing",
+      "from": "/mnt/e/Projects/Personal Projects/ange/.unipi/fusion-preset.json"
+    },
+    {
+      "action": "skipped:missing",
+      "from": "/mnt/e/Projects/Personal Projects/ange/.unipi/config/background-tasks.json"
+    }
+  ]
+}

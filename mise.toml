@@ -1,0 +1,27 @@
+[tools]
+node = "22"
+
+[env]
+# keep every cache inside the project so `mise run clean` bounds its size
+npm_config_cache = "{{config_root}}/.npm-cache"
+XDG_CACHE_HOME = "{{config_root}}/.npm-cache/xdg"
+
+[tasks.start]
+run = ['bash "{{config_root}}/scripts/start.sh"']
+description = "Install deps if needed, migrate DB, build if needed, serve on :3000"
+
+[tasks.stop]
+run = ['bash "{{config_root}}/scripts/stop.sh"']
+description = "Stop the server on :3000"
+
+[tasks.dev]
+run = "npm run dev"
+description = "Next.js dev server"
+
+[tasks.clean]
+run = ["rm -rf .next .turbo .npm-cache node_modules/.cache"]
+description = "Clear build + npm caches (size policy for caches)"
+
+[tasks.setup]
+run = ["npm install", 'bash "{{config_root}}/scripts/db-push.sh"']
+description = "Install deps and create the SQLite schema"

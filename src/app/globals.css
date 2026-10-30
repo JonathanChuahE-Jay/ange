@@ -1,0 +1,444 @@
+@import "@unocss/reset/tailwind.css";
+
+/* UnoCSS: utilities + preflights (preflights carry the --un-* transform var
+   defaults that compound utilities like -translate-x-1/2 depend on) */
+@unocss preflights, default;
+
+:root {
+  --bg: #fff8f3;
+  --ink: #43263a;
+  --ink-soft: #7a5b6e;
+  --rose: #d64560;
+  --rose-deep: #b03052;
+  --rose-soft: #f6dce2;
+  --rose-mist: #fbe9ee;
+  --gold: #c9973f;
+  --gold-soft: #f3e3c3;
+  --line: #f0dce0;
+  --card: #ffffff;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans, Inter, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Convention: no default wrapping — opt in with .wrap */
+body,
+button,
+a,
+label,
+th,
+td,
+h1, h2, h3, h4, h5, h6,
+li {
+  white-space: nowrap;
+}
+.wrap,
+p,
+.prose,
+[role="dialog"] [data-body],
+textarea,
+[data-multiline] {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* Convention: pointer affordance everywhere */
+button,
+a,
+[role="button"],
+summary,
+label[for],
+select {
+  cursor: pointer;
+}
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* Convention: thin/hidden scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--rose) 35%, transparent) transparent;
+}
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--rose) 35%, transparent);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::selection {
+  background: var(--rose-soft);
+  color: var(--rose-deep);
+}
+
+:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 2px;
+}
+
+/* ---- Micro-interaction: buttons/tap-spring (press feedback) ---- */
+.tap-spring {
+  transition:
+    transform 90ms cubic-bezier(0.4, 0, 0.6, 1),
+    opacity 150ms ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tap-spring:active {
+    transform: scale(0.95);
+    transition: transform 90ms cubic-bezier(0.4, 0, 0.6, 1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tap-spring:active {
+    transform: none;
+    opacity: 0.85;
+  }
+}
+
+/* ---- Micro-interaction: inputs/ring-scale-in ---- */
+.input-ring {
+  transition: box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.input-ring:focus-visible,
+.input-ring:focus {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--rose) inset,
+    0 0 0 4px color-mix(in srgb, var(--rose) 25%, transparent);
+}
+
+/* ---- Micro-interaction: buttons/circle-drop (primary pill) ---- */
+.btn-circle-drop {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-circle-drop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  left: 50%;
+  width: 200%;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  transform: translateY(-100%) scale(0.2);
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: -1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn-circle-drop:hover::before,
+  .btn-circle-drop:focus-visible::before {
+    animation: circle-drop-in 380ms cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
+  }
+  .btn-circle-drop:not(:hover):not(:focus-visible)::before {
+    transition: transform 220ms cubic-bezier(0.5, 0, 0.75, 0);
+    transform: translateY(-100%) scale(0.2);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-circle-drop::before {
+    transform: none;
+    animation: none;
+    opacity: 0;
+  }
+  .btn-circle-drop:hover::before {
+    opacity: 0.18;
+    transition: opacity 120ms ease;
+  }
+}
+@keyframes circle-drop-in {
+  from {
+    transform: translateY(-100%) scale(0.2);
+  }
+  to {
+    transform: translateY(-25%) scale(1);
+  }
+}
+
+/* ---- Micro-interaction: buttons/background-wipe (ghost buttons) ---- */
+.btn-wipe {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-wipe::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--rose);
+  transform: scaleX(0);
+  transform-origin: left;
+  z-index: -1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn-wipe:hover,
+  .btn-wipe:focus-visible {
+    color: #fff;
+  }
+  .btn-wipe:hover::before,
+  .btn-wipe:focus-visible::before {
+    transform: scaleX(1);
+    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-wipe:not(:hover):not(:focus-visible)::before {
+    transform-origin: right;
+    transform: scaleX(0);
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-wipe::before {
+    transform: none;
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+  .btn-wipe:hover::before {
+    opacity: 1;
+  }
+  .btn-wipe:hover {
+    color: #fff;
+  }
+}
+
+/* ---- Micro-interaction: cards/shadow-rise ---- */
+.shadow-rise {
+  position: relative;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.shadow-rise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 14px 30px -12px rgb(176 48 82 / 0.28);
+  opacity: 0;
+  transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .shadow-rise:hover {
+    transform: translateY(-4px);
+  }
+  .shadow-rise:hover::after {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shadow-rise:hover {
+    transform: none;
+  }
+  .shadow-rise::after {
+    transition: opacity 150ms ease;
+  }
+}
+
+/* ---- Micro-interaction: cards/image-zoom ---- */
+.img-zoom-frame {
+  overflow: hidden;
+}
+.img-zoom-frame img {
+  transition: transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+@media (hover: hover) and (pointer: fine) {
+  .img-zoom-frame:hover img {
+    transform: scale(1.08);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .img-zoom-frame img {
+    transition: filter 150ms ease;
+  }
+  .img-zoom-frame:hover img {
+    transform: none;
+    filter: brightness(1.05);
+  }
+}
+
+/* ---- Skeleton shimmer ---- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--rose-mist);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgb(255 255 255 / 0.65) 50%,
+    transparent 80%
+  );
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Reduced motion: kill global smooth scroll */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== Decorative system (section redesign) ===== */
+
+/* soft drifting gradient blobs */
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.5;
+  animation: blob-drift 16s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes blob-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(4%, -5%) scale(1.1);
+  }
+}
+
+/* hidden scrollbar for obvious swipe strips */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* washi tape strip (polaroids, letters) */
+.tape {
+  position: absolute;
+  width: 88px;
+  height: 24px;
+  background: rgb(246 220 226 / 0.85);
+  box-shadow: 0 1px 3px rgb(67 38 58 / 0.15);
+  border-left: 2px dotted rgb(255 255 255 / 0.6);
+  border-right: 2px dotted rgb(255 255 255 / 0.6);
+  z-index: 5;
+}
+
+/* vinyl disc spin */
+.vinyl {
+  animation: vinyl-spin 7s linear infinite;
+}
+@keyframes vinyl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* equalizer bars */
+.eq-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--rose);
+  animation: eq-bounce 1s ease-in-out infinite;
+}
+@keyframes eq-bounce {
+  0%,
+  100% {
+    height: 30%;
+  }
+  50% {
+    height: 100%;
+  }
+}
+
+/* carnival bulbs */
+.bulb {
+  animation: bulb-pulse 1.4s ease-in-out infinite;
+}
+@keyframes bulb-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* flip clock color scheme (cream default / dusk variant) */
+.flip-card {
+  --flip-bg: #43263a;
+  --flip-fg: #fff8f3;
+}
+.flip-dusk {
+  --flip-bg: rgb(255 255 255 / 0.09);
+  --flip-fg: #fff8f3;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  box-shadow: 0 0 30px rgb(214 69 96 / 0.25);
+}
+
+/* star field for dusk sections */
+.stars-layer {
+  background-image:
+    radial-gradient(1.5px 1.5px at 20% 30%, rgb(255 255 255 / 0.8) 50%, transparent 51%),
+    radial-gradient(1px 1px at 40% 70%, rgb(255 255 255 / 0.5) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 60% 20%, rgb(255 255 255 / 0.7) 50%, transparent 51%),
+    radial-gradient(1px 1px at 80% 50%, rgb(255 255 255 / 0.55) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 10% 80%, rgb(255 255 255 / 0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 90% 85%, rgb(255 255 255 / 0.6) 50%, transparent 51%),
+    radial-gradient(1px 1px at 30% 55%, rgb(255 255 255 / 0.45) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 70% 75%, rgb(255 255 255 / 0.65) 50%, transparent 51%);
+  background-size: 550px 550px;
+}
+
+/* drifting petals */
+.petal {
+  position: absolute;
+  top: -30px;
+  font-size: 18px;
+  opacity: 0.45;
+  animation: petal-fall linear infinite;
+  pointer-events: none;
+}
+@keyframes petal-fall {
+  0% {
+    transform: translateY(-5vh) translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(50vh) translateX(24px) rotate(180deg);
+  }
+  100% {
+    transform: translateY(105vh) translateX(-12px) rotate(360deg);
+  }
+}

@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.turbo/
+.npm-cache/
+data/
+.env.local
+.env
+*.log
+.DS_Store
+next-env.d.ts
+tsconfig.tsbuildinfo
+drizzle/meta/_journal.json.bak
+node_modules
+.next
+data/*.db*
+.env*
+tsconfig.tsbuildinfo
