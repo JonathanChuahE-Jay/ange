@@ -1,7 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { api, messageForCode } from "@/lib/api";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/ui/Toast";
 
 type Overview = {
   latestAnswer: { answer: string; at: string } | null;
@@ -14,6 +17,18 @@ export function OverviewPanel() {
   const { data, isPending } = useQuery({
     queryKey: ["overview"],
     queryFn: () => api.get<Overview>("/api/admin/overview"),
+  });
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const [confirmReset, setConfirmReset] = useState(false);
+  const reset = useMutation({
+    mutationFn: () => api.send("/api/admin/answers", "DELETE"),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["overview"] });
+      qc.invalidateQueries({ queryKey: ["site"] });
+      toast("Question re-armed — she'll see Yes / No again");
+    },
+    onError: (e) => toast(messageForCode((e as { code?: string }).code), "error"),
   });
 
   if (isPending || !data) {
@@ -60,7 +75,31 @@ export function OverviewPanel() {
         ) : (
           <p className="mt-2 font-display text-2xl">No answer yet — the suspense!</p>
         )}
+        {data.latestAnswer && (
+          <button
+            onClick={() => setConfirmReset(true)}
+            disabled={reset.isPending}
+            className={`mt-4 inline-flex min-h-10 items-center gap-2 rounded-full px-5 text-sm font-bold transition-colors disabled:opacity-60 ${
+              data.yesAt ? "bg-white/15 text-white hover:bg-white/25" : "bg-rosemist text-rose hover:bg-rosesoft"
+            }`}
+          >
+            <span className="icon-[lucide--rotate-ccw] size-4" />
+            {reset.isPending ? "resetting…" : "Reset answer"}
+          </button>
+        )}
       </div>
+      <ConfirmDialog
+        open={confirmReset}
+        title="Reset the answer?"
+        message="This clears the recorded answer so the Yes / No question shows again on the site. Use it to re-arm the surprise after testing."
+        confirmLabel="Reset"
+        danger
+        onConfirm={() => {
+          reset.mutate();
+          setConfirmReset(false);
+        }}
+        onCancel={() => setConfirmReset(false)}
+      />
 
       {/* counts */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
