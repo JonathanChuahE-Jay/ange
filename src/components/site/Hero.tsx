@@ -7,6 +7,11 @@ import type { Settings } from "@/lib/types";
 import { SPRING_DODGE } from "@/lib/motion";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import BlurText from "@/components/kit/BlurText";
+import { TextGenerateEffect } from "@/components/kit/text-generate-effect";
+import { ShimmerButton } from "@/components/kit/shimmer-button";
+import { BorderBeam } from "@/components/kit/border-beam";
+import { Spotlight } from "@/components/kit/spotlight-new";
 
 const HeroScene = dynamic(() => import("./HeroScene"), { ssr: false });
 
@@ -89,6 +94,16 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
       <div aria-hidden className="absolute inset-0 opacity-90">
         <HeroScene />
       </div>
+      {/* Aceternity spotlight beams, tinted rose */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 hidden md:block">
+        <Spotlight
+          gradientFirst="radial-gradient(68.54% 68.72% at 55.02% 31.46%, hsla(345, 100%, 88%, .12) 0, hsla(345, 90%, 60%, .04) 50%, hsla(345, 90%, 50%, 0) 80%)"
+          gradientSecond="radial-gradient(50% 50% at 50% 50%, hsla(345, 100%, 88%, .08) 0, hsla(345, 90%, 60%, .03) 80%, transparent 100%)"
+          gradientThird="radial-gradient(50% 50% at 50% 50%, hsla(40, 100%, 85%, .06) 0, hsla(40, 90%, 55%, .02) 80%, transparent 100%)"
+        />
+      </div>
+      {/* soft vignette so the copy always reads */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_50%,rgb(28_15_34/0.45),transparent_70%)]" />
 
       <div className="relative z-10 flex w-full max-w-2xl flex-col items-center text-center">
         <motion.p
@@ -100,23 +115,23 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
           {settings.askerName} has a question for {settings.partnerName}…
         </motion.p>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.7 }}
-          className="mt-4 wrap font-display text-4xl leading-tight text-white drop-shadow-lg md:text-6xl"
-        >
-          {settings.question}
-        </motion.h1>
+        <BlurText
+          as="h1"
+          text={settings.question}
+          trigger="load"
+          animateBy="words"
+          direction="top"
+          delay={140}
+          className="wrap mt-4 justify-center font-display text-4xl leading-tight text-white drop-shadow-[0_4px_24px_rgb(214_69_96/0.45)] md:text-6xl"
+        />
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
-          className="mt-4 max-w-md text-[15px] text-white/70 md:text-base"
-        >
-          {settings.questionSubtext}
-        </motion.p>
+        {settings.questionSubtext && (
+          <TextGenerateEffect
+            words={settings.questionSubtext}
+            duration={0.6}
+            className="wrap mt-5 max-w-md text-[15px] leading-relaxed text-white/75 md:text-base"
+          />
+        )}
 
         <div ref={dodgeRef} className="relative mt-10 flex min-h-30 items-center justify-center gap-5">
           <AnimatePresence mode="wait">
@@ -126,8 +141,9 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
                 initial={{ scale: 0.3, opacity: 0 }}
                 animate={{ scale: [0.3, 1.08, 0.96, 1.02, 1], opacity: 1 }}
                 transition={{ duration: 0.5, ease: [0.215, 0.61, 0.355, 1] }}
-                className="rounded-3xl border border-white/25 bg-white/12 px-8 py-6 backdrop-blur-md"
+                className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/10 px-8 py-6 backdrop-blur-md"
               >
+                <BorderBeam size={120} duration={7} colorFrom="#F6DCE2" colorTo="#C9973F" />
                 <p className="wrap font-display text-xl text-white md:text-2xl" data-multiline>
                   {settings.yesResponse}
                 </p>
@@ -137,12 +153,15 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
               </motion.div>
             ) : (
               <motion.div key="asking" className="flex items-center justify-center gap-5">
-                <button
+                <ShimmerButton
                   onClick={celebrate}
-                  className="tap-spring btn-circle-drop min-h-14 rounded-full bg-white px-12 text-lg font-bold text-rose shadow-xl hover:bg-rose-soft"
+                  background="linear-gradient(135deg, #E25A74 0%, #D64560 45%, #B03052 100%)"
+                  shimmerColor="#FFE3EA"
+                  shimmerDuration="2.6s"
+                  className="tap-spring min-h-14 px-12 text-lg font-bold shadow-[0_0_40px_rgb(214_69_96/0.55)] transition-shadow hover:shadow-[0_0_60px_rgb(214_69_96/0.8)]"
                 >
-                  Yes 💖
-                </button>
+                  <span className="relative z-10">Yes 💖</span>
+                </ShimmerButton>
                 <motion.button
                   onHoverStart={dodgeNo}
                   onFocus={dodgeNo}
@@ -152,7 +171,7 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
                   }}
                   animate={{ x: noPos.x, y: noPos.y, scale: Math.max(0.55, 1 - noAttempts * 0.08) }}
                   transition={SPRING_DODGE}
-                  className="btn-wipe tap-spring min-h-14 rounded-full border border-white/50 px-10 text-lg font-semibold text-white/85"
+                  className="btn-wipe tap-spring min-h-14 rounded-full border border-white/40 bg-white/5 px-10 text-lg font-semibold text-white/85 backdrop-blur-sm"
                   style={{ pointerEvents: noAttempts >= NO_LABELS.length - 1 ? "none" : "auto" }}
                 >
                   {NO_LABELS[noAttempts]}
@@ -175,7 +194,7 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
               <motion.span
                 animate={{ y: [0, 6, 0] }}
                 transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
-                className="i-lucide-chevron-down size-5"
+                className="icon-[lucide--chevron-down] size-5"
               />
             </motion.a>
           )}

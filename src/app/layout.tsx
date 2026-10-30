@@ -5,13 +5,13 @@ import "./globals.css";
 
 const display = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-display",
+  variable: "--font-playfair",
   style: ["normal", "italic"],
 });
 
-const hand = Caveat({ subsets: ["latin"], variable: "--font-hand" });
+const hand = Caveat({ subsets: ["latin"], variable: "--font-caveat" });
 
-const sans = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const sans = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: "For You 💖",

@@ -18,14 +18,14 @@ export type AdminTab =
   | "prizes";
 
 const TABS: { id: AdminTab; label: string; icon: string }[] = [
-  { id: "overview", label: "Overview", icon: "i-lucide-layout-dashboard" },
-  { id: "story", label: "Question & Letter", icon: "i-lucide-heart" },
-  { id: "timeline", label: "Timeline", icon: "i-lucide-milestone" },
-  { id: "photos", label: "Photos", icon: "i-lucide-image" },
-  { id: "chats", label: "Chats", icon: "i-lucide-message-circle" },
-  { id: "loves", label: "Things you love", icon: "i-lucide-sparkles" },
-  { id: "music", label: "Music", icon: "i-lucide-music" },
-  { id: "prizes", label: "Prize wheel", icon: "i-lucide-gift" },
+  { id: "overview", label: "Overview", icon: "icon-[lucide--layout-dashboard]" },
+  { id: "story", label: "Question & Letter", icon: "icon-[lucide--heart]" },
+  { id: "timeline", label: "Timeline", icon: "icon-[lucide--milestone]" },
+  { id: "photos", label: "Photos", icon: "icon-[lucide--image]" },
+  { id: "chats", label: "Chats", icon: "icon-[lucide--message-circle]" },
+  { id: "loves", label: "Things you love", icon: "icon-[lucide--sparkles]" },
+  { id: "music", label: "Music", icon: "icon-[lucide--music]" },
+  { id: "prizes", label: "Prize wheel", icon: "icon-[lucide--gift]" },
 ];
 
 export function AdminShell({
@@ -64,7 +64,7 @@ export function AdminShell({
       <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-white px-4 py-6 md:flex">
         <a href="/" className="mb-8 flex items-center gap-2 px-2">
           <span className="flex size-9 items-center justify-center rounded-xl bg-rose text-white">
-            <span className="i-lucide-heart size-5 fill-white" />
+            <span className="icon-[lucide--heart] size-5 fill-white" />
           </span>
           <span className="font-display text-lg text-ink">ange · admin</span>
         </a>
@@ -89,7 +89,7 @@ export function AdminShell({
             onClick={() => setConfirmLogout(true)}
             className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-semibold text-inksoft transition-colors hover:bg-rosemist/50 hover:text-rosedeep"
           >
-            <span className="i-lucide-log-out size-[18px]" />
+            <span className="icon-[lucide--log-out] size-[18px]" />
             Log out
           </button>
         </div>
@@ -100,7 +100,7 @@ export function AdminShell({
         <div className="flex items-center justify-between px-4 py-3">
           <a href="/" className="flex items-center gap-2">
             <span className="flex size-8 items-center justify-center rounded-lg bg-rose text-white">
-              <span className="i-lucide-heart size-4 fill-white" />
+              <span className="icon-[lucide--heart] size-4 fill-white" />
             </span>
             <span className="font-display text-base text-ink">ange · admin</span>
           </a>
@@ -109,7 +109,7 @@ export function AdminShell({
             aria-label="Log out"
             className="flex size-10 items-center justify-center rounded-xl text-inksoft"
           >
-            <span className="i-lucide-log-out size-5" />
+            <span className="icon-[lucide--log-out] size-5" />
           </button>
         </div>
         <div

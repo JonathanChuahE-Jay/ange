@@ -41,7 +41,7 @@ export function ResourceList<T extends { id: number }>({
           onClick={onAdd}
           className="tap-spring btn-circle-drop inline-flex min-h-10 items-center gap-2 rounded-full bg-rose px-5 text-sm font-bold text-white hover:bg-rosedeep"
         >
-          <span className="i-lucide-plus size-4" /> {addLabel}
+          <span className="icon-[lucide--plus] size-4" /> {addLabel}
         </button>
       </div>
 
@@ -81,14 +81,14 @@ export function ResourceList<T extends { id: number }>({
                   aria-label="Edit"
                   className="flex size-10 items-center justify-center rounded-xl text-inksoft transition-colors hover:bg-rosemist hover:text-rose"
                 >
-                  <span className="i-lucide-pencil size-[18px]" />
+                  <span className="icon-[lucide--pencil] size-[18px]" />
                 </button>
                 <button
                   onClick={() => onDelete(item)}
                   aria-label="Delete"
                   className="flex size-10 items-center justify-center rounded-xl text-inksoft transition-colors hover:bg-rose-soft hover:text-rosedeep"
                 >
-                  <span className="i-lucide-trash-2 size-[18px]" />
+                  <span className="icon-[lucide--trash-2] size-[18px]" />
                 </button>
               </div>
             </motion.div>

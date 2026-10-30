@@ -27,12 +27,12 @@ export function OverviewPanel() {
   }
 
   const cards = [
-    { label: "Timeline moments", value: data.counts.timeline, icon: "i-lucide-milestone" },
-    { label: "Photos", value: data.counts.photos, icon: "i-lucide-image" },
-    { label: "Chat quotes", value: data.counts.chats, icon: "i-lucide-message-circle" },
-    { label: "Loves", value: data.counts.loves, icon: "i-lucide-sparkles" },
-    { label: "Songs", value: data.counts.tracks, icon: "i-lucide-music" },
-    { label: "Prizes", value: data.counts.prizes, icon: "i-lucide-gift" },
+    { label: "Timeline moments", value: data.counts.timeline, icon: "icon-[lucide--milestone]" },
+    { label: "Photos", value: data.counts.photos, icon: "icon-[lucide--image]" },
+    { label: "Chat quotes", value: data.counts.chats, icon: "icon-[lucide--message-circle]" },
+    { label: "Loves", value: data.counts.loves, icon: "icon-[lucide--sparkles]" },
+    { label: "Songs", value: data.counts.tracks, icon: "icon-[lucide--music]" },
+    { label: "Prizes", value: data.counts.prizes, icon: "icon-[lucide--gift]" },
   ];
 
   return (

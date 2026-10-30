@@ -5,6 +5,9 @@ import QRCode from "qrcode";
 import { useEffect, useMemo, useState } from "react";
 import { whatsappLink, type ChatQuote } from "@/lib/types";
 import { SectionHeading } from "./SectionHeading";
+import { AnimatedList } from "@/components/kit/animated-list";
+import { BorderBeam } from "@/components/kit/border-beam";
+import { MagicCard } from "@/components/kit/magic-card";
 
 /** What your chats say — a WhatsApp-styled phone plus a scan-to-reply QR
  *  that opens a real WhatsApp chat with the asker. */
@@ -32,7 +35,7 @@ export function Chats({
         <SectionHeading
           kicker="exhibit A, your honor"
           title="What your chats say"
-          icon="i-lucide-message-circle-heart"
+          icon="icon-[lucide--message-circle-heart]"
           note="the receipts"
         />
 
@@ -51,9 +54,9 @@ export function Chats({
             <div className="flex items-center justify-between bg-gradient-to-b from-[#075E54] to-[#054d44] px-7 pt-4 pb-2 text-white">
               <span className="text-[12px] font-semibold">9:41</span>
               <span className="flex items-center gap-1.5" aria-hidden>
-                <span className="i-lucide-signal size-3.5" />
-                <span className="i-lucide-wifi size-3.5" />
-                <span className="i-lucide-battery-full size-4.5" />
+                <span className="icon-[lucide--signal] size-3.5" />
+                <span className="icon-[lucide--wifi] size-3.5" />
+                <span className="icon-[lucide--battery-full] size-4.5" />
               </span>
             </div>
 
@@ -66,56 +69,49 @@ export function Chats({
                 <p className="text-sm font-bold">{partnerName}</p>
                 <p className="text-[11px] text-white/70">online</p>
               </div>
-              <span className="i-simple-icons-whatsapp ml-auto size-5 text-white/90" aria-hidden />
+              <span className="icon-[simple-icons--whatsapp] ml-auto size-5 text-white/90" aria-hidden />
             </div>
 
-            {/* messages */}
-            <div className="flex max-h-[26rem] flex-col gap-2 bg-[#ECE5DD] p-3.5">
-              <span className="mx-auto rounded-lg bg-white/80 px-3 py-1 text-[10px] font-bold tracking-wider text-inksoft/70 uppercase shadow-sm">
+            {/* messages — Magic UI AnimatedList pops them in one by one like a live chat */}
+            <div className="flex h-[26rem] flex-col justify-end gap-2 overflow-hidden bg-[#ECE5DD] bg-[radial-gradient(rgb(7_94_84/0.06)_1px,transparent_1px)] bg-[size:14px_14px] p-3.5">
+              <span className="mx-auto mb-auto rounded-lg bg-white/80 px-3 py-1 text-[10px] font-bold tracking-wider text-inksoft/70 uppercase shadow-sm">
                 today
               </span>
-              {chats.map((c, i) => (
-                <motion.div
-                  key={c.id}
-                  initial={{ opacity: 0, scale: 0.85, y: 10 }}
-                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-30px" }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 500,
-                    damping: 22,
-                    delay: Math.min(i * 0.1, 0.6),
-                  }}
-                  className={`flex max-w-[82%] flex-col ${c.side === "me" ? "self-end items-end" : "self-start items-start"}`}
-                >
-                  <div className="relative">
-                    <p
-                      className={`wrap rounded-2xl px-3 py-2 text-[15px] leading-snug shadow-sm ${
-                        c.side === "me"
-                          ? "rounded-br-md bg-[#DCF8C6] text-[#111B21]"
-                          : "rounded-bl-md bg-white text-[#111B21]"
-                      }`}
-                      data-multiline
-                    >
-                      {c.text}
-                      <span className="ml-2 inline-flex translate-y-0.5 items-center gap-1 text-[10px] whitespace-nowrap text-inksoft/60">
-                        {c.timeLabel}
-                        {c.side === "me" && (
-                          <span className="i-lucide-check-check size-3.5 text-[#34B7F1]" aria-hidden />
-                        )}
-                      </span>
-                    </p>
-                    {i === lastPartnerIdx && (
-                      <span
-                        aria-hidden
-                        className="absolute -bottom-1.5 left-2 rounded-full border border-[#ECE5DD] bg-white px-1.5 py-0.5 text-[11px] shadow-sm"
+              <AnimatedList order="append" startOnView delay={900} className="gap-2">
+                {chats.map((c, i) => (
+                  <div
+                    key={c.id}
+                    className={`flex w-full ${c.side === "me" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div className="relative max-w-[82%]">
+                      <p
+                        className={`wrap rounded-2xl px-3 py-2 text-[15px] leading-snug shadow-sm ${
+                          c.side === "me"
+                            ? "rounded-br-md bg-[#DCF8C6] text-[#111B21]"
+                            : "rounded-bl-md bg-white text-[#111B21]"
+                        }`}
+                        data-multiline
                       >
-                        ❤️
-                      </span>
-                    )}
+                        {c.text}
+                        <span className="ml-2 inline-flex translate-y-0.5 items-center gap-1 text-[10px] whitespace-nowrap text-inksoft/60">
+                          {c.timeLabel}
+                          {c.side === "me" && (
+                            <span className="icon-[lucide--check-check] size-3.5 text-[#34B7F1]" aria-hidden />
+                          )}
+                        </span>
+                      </p>
+                      {i === lastPartnerIdx && (
+                        <span
+                          aria-hidden
+                          className="absolute -bottom-1.5 left-2 rounded-full border border-[#ECE5DD] bg-white px-1.5 py-0.5 text-[11px] shadow-sm"
+                        >
+                          ❤️
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </motion.div>
-              ))}
+                ))}
+              </AnimatedList>
 
               {/* typing indicator */}
               <div className="mt-1 flex items-center gap-2 self-start">
@@ -165,9 +161,16 @@ function ScanCard({ askerName, whatsappPhone }: { askerName: string; whatsappPho
       whileInView={{ opacity: 1, y: 0, rotate: 1 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-      className="shadow-rise relative w-full max-w-xs rounded-3xl border border-line bg-white p-6 text-center"
+      className="relative w-full max-w-xs"
     >
-      <span aria-hidden className="tape -top-3 left-1/2 z-5 -translate-x-1/2 rotate-2" />
+      <span aria-hidden className="tape -top-3 left-1/2 z-50 -translate-x-1/2 rotate-2" />
+      <MagicCard
+        className="rounded-3xl shadow-[0_20px_50px_-25px_rgb(7_94_84/0.5)]"
+        gradientColor="#E3F4EF"
+        gradientFrom="#25D366"
+        gradientTo="#D64560"
+      >
+      <div className="p-6 text-center">
       <p className="text-[12px] font-bold tracking-[0.3em] text-[#075E54] uppercase">keep talking</p>
       <h3 className="mt-2 font-display text-2xl text-ink">Reply for real</h3>
       {link && qr ? (
@@ -185,19 +188,22 @@ function ScanCard({ askerName, whatsappPhone }: { askerName: string; whatsappPho
             rel="noreferrer"
             className="tap-spring btn-circle-drop mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#075E54] px-6 text-sm font-bold text-white hover:bg-[#054d44]"
           >
-            <span className="i-simple-icons-whatsapp size-4" aria-hidden />
+            <span className="icon-[simple-icons--whatsapp] size-4" aria-hidden />
             open chat
           </a>
         </>
       ) : (
         <div className="mt-4 flex flex-col items-center gap-2 rounded-2xl border border-dashed border-line bg-rosemist/30 px-4 py-8">
-          <span className="i-lucide-qr-code size-10 text-inksoft/40" aria-hidden />
+          <span className="icon-[lucide--qr-code] size-10 text-inksoft/40" aria-hidden />
           <p className="wrap text-sm text-inksoft" data-multiline>
             {askerName} hasn't set a WhatsApp number yet — add it in the admin panel to light up the
             scan-to-reply QR.
           </p>
         </div>
       )}
+      </div>
+      </MagicCard>
+      <BorderBeam size={90} duration={9} colorFrom="#25D366" colorTo="#D64560" className="rounded-3xl" />
     </motion.div>
   );
 }

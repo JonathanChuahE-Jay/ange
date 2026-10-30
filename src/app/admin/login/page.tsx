@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm rounded-3xl border border-line bg-white p-8 shadow-xl">
         <div className="flex flex-col items-center text-center">
           <span className="flex size-14 items-center justify-center rounded-2xl bg-rose text-white shadow-lg">
-            <span className="i-lucide-heart size-7 fill-white" />
+            <span className="icon-[lucide--heart] size-7 fill-white" />
           </span>
           <h1 className="mt-4 font-display text-3xl text-ink">Admin login</h1>
           <p className="mt-1 text-sm text-inksoft">the love dashboard awaits</p>

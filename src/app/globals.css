@@ -1,9 +1,10 @@
-@import "@unocss/reset/tailwind.css";
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@iconify/tailwind4";
 
-/* UnoCSS: utilities + preflights (preflights carry the --un-* transform var
-   defaults that compound utilities like -translate-x-1/2 depend on) */
-@unocss preflights, default;
+@custom-variant dark (&:is(.dark *));
 
+/* ---------- Design tokens (dusk-romantic) ---------- */
 :root {
   --bg: #fff8f3;
   --ink: #43263a;
@@ -16,6 +17,151 @@
   --gold-soft: #f3e3c3;
   --line: #f0dce0;
   --card: #ffffff;
+
+  /* shadcn semantic tokens mapped onto the palette */
+  --radius: 1rem;
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--rose);
+  --primary-foreground: #ffffff;
+  --secondary: var(--rose-mist);
+  --secondary-foreground: var(--rose-deep);
+  --muted: var(--rose-mist);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--gold-soft);
+  --accent-foreground: var(--ink);
+  --destructive: var(--rose-deep);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--rose);
+}
+
+@theme inline {
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-hand: var(--font-caveat), cursive;
+  --font-sans: var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg: #fff8f3;
+  --color-ink: #43263a;
+  --color-inksoft: #7a5b6e;
+  --color-rose: #d64560;
+  --color-rosedeep: #b03052;
+  --color-rosesoft: #f6dce2;
+  --color-rose-soft: #f6dce2;
+  --color-rosemist: #fbe9ee;
+  --color-gold: #c9973f;
+  --color-goldsoft: #f3e3c3;
+  --color-line: #f0dce0;
+  --color-dusk0: #1c0f22;
+  --color-dusk1: #3a1533;
+  --color-dusk2: #6e2748;
+  --color-dusk3: #b34a5e;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+  --animate-meteor: meteor 5s linear infinite;
+  --animate-shine: shine var(--duration) infinite linear;
+  @keyframes marquee {
+  from {
+    transform: translateX(0);
+    }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+    }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes shimmer-slide {
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+    }
+  }
+  @keyframes spin-around {
+  0% {
+    transform: translateZ(0) rotate(0);
+    }
+  15%, 35% {
+    transform: translateZ(0) rotate(90deg);
+    }
+  65%, 85% {
+    transform: translateZ(0) rotate(270deg);
+    }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+    }
+  }
+  @keyframes meteor {
+  0% {
+    transform: rotate(var(--angle)) translateX(0);
+    opacity: 1;
+    }
+  70% {
+    opacity: 1;
+    }
+  100% {
+    transform: rotate(var(--angle)) translateX(-500px);
+    opacity: 0;
+    }
+  }
+  @keyframes shine {
+  0% {
+    background-position: 0% 0%;
+    }
+  50% {
+    background-position: 100% 100%;
+    }
+  to {
+    background-position: 0% 0%;
+    }
+  }
+}
+
+/* Tailwind v4 defaults borders to currentColor; keep the old hairline default */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+  [class*="icon-["] {
+    vertical-align: middle;
+  }
 }
 
 html {

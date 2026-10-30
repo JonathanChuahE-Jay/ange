@@ -9,7 +9,8 @@ private admin panel to edit every word, photo, date and prize.
 |------------|--------|
 | Framework  | Next.js 16 (App Router, Turbopack, React 19) — one codebase, deployable to any Node server or Vercel later |
 | DB         | SQLite via better-sqlite3 + Drizzle ORM (file at `data/ange.db`) |
-| Styling    | UnoCSS (presetWind3) + presetIcons (lucide) |
+| Styling    | Tailwind CSS v4 (`@theme` tokens in globals.css) + `@iconify/tailwind4` icons (`icon-[lucide--heart]`) |
+| UI kits    | shadcn/ui (Dialog, Tooltip, Button) · Aceternity UI (Timeline, FloatingDock, 3D Card, Spotlight, TextGenerateEffect) · Magic UI (Marquee, AnimatedList, MagicCard, BorderBeam, ShimmerButton, Meteors, DotPattern, ScrollProgress, ShineBorder) · React Bits (BlurText, ShinyText) — all vendored in `src/components/kit/` |
 | Data       | TanStack Query v5 |
 | Validation | Zod v4 (every form + every API body) |
 | 3D         | three + @react-three/fiber + @react-three/drei (hero scene) |

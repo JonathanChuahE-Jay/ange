@@ -107,7 +107,7 @@ export function MusicManager() {
           disabled={uploading}
           className="tap-spring btn-circle-drop inline-flex min-h-10 items-center gap-2 rounded-full bg-rose px-5 text-sm font-bold text-white hover:bg-rosedeep disabled:opacity-60"
         >
-          <span className="i-lucide-upload size-4" />
+          <span className="icon-[lucide--upload] size-4" />
           {uploading ? "uploading…" : "Upload song"}
         </button>
       </div>
@@ -133,7 +133,7 @@ export function MusicManager() {
             className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-white px-5 py-4 shadow-sm sm:flex-nowrap"
           >
             <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-ink text-goldsoft">
-              <span className="i-lucide-music size-5" />
+              <span className="icon-[lucide--music] size-5" />
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold text-ink">{t.title}</p>
@@ -150,14 +150,14 @@ export function MusicManager() {
                 aria-label="Edit details"
                 className="flex size-10 items-center justify-center rounded-xl text-inksoft transition-colors hover:bg-rosemist hover:text-rose"
               >
-                <span className="i-lucide-pencil size-4.5" />
+                <span className="icon-[lucide--pencil] size-4.5" />
               </button>
               <button
                 onClick={() => setDeleting(t)}
                 aria-label="Delete song"
                 className="flex size-10 items-center justify-center rounded-xl text-inksoft transition-colors hover:bg-rose-soft hover:text-rosedeep"
               >
-                <span className="i-lucide-trash-2 size-4.5" />
+                <span className="icon-[lucide--trash-2] size-4.5" />
               </button>
             </div>
           </div>

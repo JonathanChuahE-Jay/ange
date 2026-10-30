@@ -77,7 +77,7 @@ export function PhotosManager() {
           disabled={uploading}
           className="tap-spring btn-circle-drop inline-flex min-h-10 items-center gap-2 rounded-full bg-rose px-5 text-sm font-bold text-white hover:bg-rosedeep disabled:opacity-60"
         >
-          <span className="i-lucide-upload size-4" />
+          <span className="icon-[lucide--upload] size-4" />
           {uploading ? "uploading…" : "Upload photo"}
         </button>
       </div>
@@ -178,14 +178,14 @@ function PagedGrid({
               aria-label="Edit caption"
               className="flex size-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rose"
             >
-              <span className="i-lucide-pencil size-4" />
+              <span className="icon-[lucide--pencil] size-4" />
             </button>
             <button
               onClick={() => onDelete(p)}
               aria-label="Delete photo"
               className="flex size-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rosedeep"
             >
-              <span className="i-lucide-trash-2 size-4" />
+              <span className="icon-[lucide--trash-2] size-4" />
             </button>
           </div>
         </figure>

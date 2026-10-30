@@ -15,6 +15,7 @@ import { Wheel } from "./Wheel";
 import { Footer } from "./Footer";
 import { DotNav } from "./DotNav";
 import { TopMusicBar } from "./TopMusicBar";
+import { ScrollProgress } from "@/components/kit/scroll-progress";
 
 export function SitePage({ initial }: { initial: SiteContent }) {
   const { data, isPending } = useQuery({
@@ -28,6 +29,7 @@ export function SitePage({ initial }: { initial: SiteContent }) {
 
   return (
     <main className="relative">
+      <ScrollProgress className="z-[60] h-[3px] from-rose via-gold to-rosesoft shadow-[0_0_10px_rgb(214_69_96/0.6)]" />
       <TopMusicBar tracks={c.tracks} />
       <Hero settings={c.settings} answeredYesAt={c.answeredYesAt} />
       <Timeline events={c.timeline} />

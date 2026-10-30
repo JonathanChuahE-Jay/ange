@@ -3,7 +3,9 @@
 import { motion } from "motion/react";
 import { useRef, useState } from "react";
 import type { Prize } from "@/lib/types";
-import { Modal } from "@/components/ui/Modal";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/kit/dialog";
+import { ShimmerButton } from "@/components/kit/shimmer-button";
+import { ShineBorder } from "@/components/kit/shine-border";
 import { SectionHeading } from "./SectionHeading";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -81,16 +83,16 @@ export function Wheel({ prizes }: { prizes: Prize[] }) {
   }
 
   return (
-    <section id="wheel" className="relative mx-auto w-full max-w-3xl scroll-mt-20 overflow-x-clip px-5 py-24">
+    <section id="wheel" className="relative w-full scroll-mt-20 overflow-x-clip px-5 py-24">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="blob size-80 bg-rosemist right-[-5rem] top-1/4" style={{ animationDuration: "16s" }} />
       </div>
 
-      <div className="relative mt-2">
+      <div className="relative mx-auto mt-2 max-w-3xl">
         <SectionHeading
           kicker="every slice is a win"
           title="A prize wheel"
-          icon="i-lucide-gift"
+          icon="icon-[lucide--gift]"
           note="no take-backs, only prizes"
         />
 
@@ -195,43 +197,54 @@ export function Wheel({ prizes }: { prizes: Prize[] }) {
             </svg>
           </div>
 
-          <button
+          <ShimmerButton
             onClick={() => !spinning && spin.mutate()}
             disabled={spinning || prizes.length === 0}
-            className="tap-spring btn-circle-drop mt-12 min-h-14 rounded-full bg-gradient-to-r from-rose to-rosedeep px-12 font-display text-xl font-bold tracking-[0.15em] text-white shadow-xl uppercase hover:brightness-110 disabled:opacity-60"
+            background="linear-gradient(135deg, #D64560 0%, #B03052 100%)"
+            shimmerColor="#F3E3C3"
+            className="tap-spring mt-12 min-h-14 px-12 font-display text-xl font-bold tracking-[0.15em] uppercase shadow-[0_14px_40px_-10px_rgb(214_69_96/0.7)] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {spinning ? "spinning…" : prizes.length === 0 ? "No prizes yet" : "Spin"}
-          </button>
+            <span className="relative z-10">
+              {spinning ? "spinning…" : prizes.length === 0 ? "No prizes yet" : "Spin"}
+            </span>
+          </ShimmerButton>
           <p className="mt-3 font-hand text-xl text-inksoft">
             one spin = one redeemable prize, screenshot your coupon
           </p>
         </div>
       </div>
 
-      <Modal open={result !== null} onClose={() => setResult(null)} celebratory>
-        {result && (
-          <div className="flex flex-col items-center py-4 text-center">
-            <motion.span
-              initial={{ scale: 0 }}
-              animate={{ scale: [0, 1.3, 1] }}
-              transition={{ duration: 0.45, ease: [0.215, 0.61, 0.355, 1] }}
-              className="text-7xl"
-              aria-hidden
-            >
-              {result.prize.emoji}
-            </motion.span>
-            <p className="mt-3 font-hand text-2xl text-gold">you won…</p>
-            <h3 className="mt-1 font-display text-4xl text-ink">{result.prize.label}!</h3>
-            <p className="mt-2 text-[15px] text-inksoft">Screenshot this as your coupon</p>
-            <button
-              onClick={() => setResult(null)}
-              className="tap-spring btn-circle-drop mt-6 min-h-12 rounded-full bg-rose px-8 font-bold text-white hover:bg-rosedeep"
-            >
-              Claim it 💖
-            </button>
-          </div>
-        )}
-      </Modal>
+      <Dialog open={result !== null} onOpenChange={(o) => !o && setResult(null)}>
+        <DialogContent className="max-w-sm overflow-hidden rounded-3xl border-line bg-bg p-8 sm:max-w-sm">
+          <ShineBorder borderWidth={2} duration={10} shineColor={["#D64560", "#C9973F", "#F6DCE2"]} />
+          {result && (
+            <div className="flex flex-col items-center py-2 text-center">
+              <motion.span
+                initial={{ scale: 0, rotate: -20 }}
+                animate={{ scale: [0, 1.3, 1], rotate: 0 }}
+                transition={{ duration: 0.45, ease: [0.215, 0.61, 0.355, 1] }}
+                className="text-7xl"
+                aria-hidden
+              >
+                {result.prize.emoji}
+              </motion.span>
+              <DialogDescription className="mt-3 font-hand text-2xl text-gold">you won…</DialogDescription>
+              <DialogTitle className="wrap mt-1 font-display text-4xl font-normal text-ink">
+                {result.prize.label}!
+              </DialogTitle>
+              <p className="mt-2 text-[15px] text-inksoft">Screenshot this as your coupon</p>
+              <ShimmerButton
+                onClick={() => setResult(null)}
+                background="linear-gradient(135deg, #D64560 0%, #B03052 100%)"
+                shimmerColor="#FFE3EA"
+                className="tap-spring mt-6 min-h-12 px-8 font-bold"
+              >
+                <span className="relative z-10">Claim it 💖</span>
+              </ShimmerButton>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

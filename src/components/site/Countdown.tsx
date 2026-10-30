@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { Settings } from "@/lib/types";
 import { SectionHeading } from "./SectionHeading";
+import { Meteors } from "@/components/kit/meteors";
+import { BorderBeam } from "@/components/kit/border-beam";
 
 /**
  * Countdown — spec: numbers/flip-number (split-flap: upper flap falls 150ms
@@ -123,7 +125,7 @@ export function Countdown({ settings }: { settings: Settings }) {
   if (!valid) {
     body = (
       <div className="flex max-w-md flex-col items-center gap-3 rounded-3xl border border-white/15 bg-white/5 px-10 py-10 text-center backdrop-blur-sm">
-        <span className="i-lucide-moon-star size-9 text-goldsoft" aria-hidden />
+        <span className="icon-[lucide--moon-star] size-9 text-goldsoft" aria-hidden />
         <p className="font-hand text-3xl text-white/90">a date is being picked… ✨</p>
         <p className="text-sm text-white/45">(it'll appear here the second it's set)</p>
       </div>
@@ -146,10 +148,11 @@ export function Countdown({ settings }: { settings: Settings }) {
     const seconds = Math.floor(diff / 1000) % 60;
     body = (
       <div
-        className="flex flex-wrap items-start justify-center gap-5 md:gap-9"
+        className="relative flex flex-wrap items-start justify-center gap-5 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] px-6 py-8 backdrop-blur-sm md:gap-9 md:px-10"
         role="timer"
         aria-label={`${days} days, ${hours} hours, ${minutes} minutes remaining`}
       >
+        <BorderBeam size={140} duration={10} colorFrom="#D64560" colorTo="#F3E3C3" />
         <FlipGroup value={pad(days, Math.min(3, String(days).length))} label="days" />
         <FlipGroup value={pad(hours)} label="hours" />
         <FlipGroup value={pad(minutes)} label="minutes" />
@@ -165,6 +168,9 @@ export function Countdown({ settings }: { settings: Settings }) {
     >
       {/* star field + rose glow + petals */}
       <div aria-hidden className="stars-layer absolute inset-0 opacity-70" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <Meteors number={18} angle={215} className="bg-rosesoft shadow-[0_0_0_1px_#ffffff10]" />
+      </div>
       <div aria-hidden className="absolute top-1/2 left-1/2 size-[38rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose/20 blur-[110px]" />
       <div aria-hidden className="absolute inset-0 overflow-hidden">
         <span className="petal left-[12%] text-rose-soft" style={{ animationDuration: "12s" }}>♥</span>
@@ -177,7 +183,7 @@ export function Countdown({ settings }: { settings: Settings }) {
           dark
           kicker="tick tock"
           title="A countdown"
-          icon="i-lucide-timer"
+          icon="icon-[lucide--timer]"
         />
         <p className="mt-5 font-hand text-3xl text-rosemist/90">{settings.countdownTitle}</p>
         <div className="mt-12 flex justify-center">{body}</div>

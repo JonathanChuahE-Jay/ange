@@ -101,14 +101,14 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
       role={toast.kind === "error" ? "alert" : "status"}
       className={`wrap pointer-events-auto flex min-h-11 max-w-[90vw] items-center gap-3 rounded-full px-5 py-3 text-sm font-medium shadow-xl ${KIND_STYLES[toast.kind]}`}
     >
-      <span className="i-lucide-check-circle size-[18px] shrink-0 opacity-80" />
+      <span className="icon-[lucide--check-circle] size-[18px] shrink-0 opacity-80" />
       <span>{toast.message}</span>
       <button
         onClick={onDismiss}
         aria-label="Dismiss"
         className="ml-1 rounded-full p-1 opacity-70 transition-opacity hover:opacity-100"
       >
-        <span className="i-lucide-x size-4" />
+        <span className="icon-[lucide--x] size-4" />
       </button>
     </motion.div>
   );

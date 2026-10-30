@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Track } from "@/lib/types";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/kit/tooltip";
 
 /** Floating top music bar — plays admin-uploaded tracks site-wide. */
 export function TopMusicBar({ tracks }: { tracks: Track[] }) {
@@ -66,7 +67,7 @@ export function TopMusicBar({ tracks }: { tracks: Track[] }) {
       role="region"
       aria-label="Music player"
     >
-      <div className="flex max-w-[calc(100vw-1.5rem)] items-center gap-1.5 rounded-full border border-white/10 bg-ink/75 py-1.5 pr-1.5 pl-4 text-white shadow-xl backdrop-blur-md">
+      <div className="flex max-w-[calc(100vw-1.5rem)] items-center gap-1.5 rounded-full border border-white/15 bg-dusk0/70 shadow-[0_10px_30px_-10px_rgb(28_15_34/0.6)] py-1.5 pr-1.5 pl-4 text-white shadow-xl backdrop-blur-md">
         {playing ? (
           <span className="flex h-4 items-end gap-[3px]" aria-hidden>
             <span className="eq-bar" style={{ animationDelay: "0ms" }} />
@@ -74,37 +75,52 @@ export function TopMusicBar({ tracks }: { tracks: Track[] }) {
             <span className="eq-bar" style={{ animationDelay: "0.4s" }} />
           </span>
         ) : (
-          <span className="i-lucide-music size-4 text-goldsoft" aria-hidden />
+          <span className="icon-[lucide--music] size-4 text-goldsoft" aria-hidden />
         )}
         <div className="mx-1 min-w-0 w-28 sm:w-44">
           <p className="truncate text-[13px] font-semibold">{current.title}</p>
           {current.artist && <p className="truncate text-[11px] text-white/55">{current.artist}</p>}
         </div>
-        <button
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
           onClick={() => step(-1)}
           aria-label="Previous song"
           className="tap-spring flex size-9 items-center justify-center rounded-full transition-colors hover:bg-white/10"
         >
-          <span className="i-lucide-skip-back size-4 fill-white" />
+          <span className="icon-[lucide--skip-back] size-4 fill-white" />
         </button>
-        <button
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Previous song</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
           onClick={toggle}
           aria-label={playing ? "Pause" : "Play"}
           className="tap-spring flex size-10 items-center justify-center rounded-full bg-rose shadow-md transition-transform hover:scale-105"
         >
           <span
             className={
-              playing ? "i-lucide-pause size-5 fill-white" : "i-lucide-play size-5 ml-0.5 fill-white"
+              playing ? "icon-[lucide--pause] size-5 fill-white" : "icon-[lucide--play] size-5 ml-0.5 fill-white"
             }
           />
         </button>
-        <button
+          </TooltipTrigger>
+          <TooltipContent side="bottom">{playing ? "Pause" : "Play"}</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
           onClick={() => step(1)}
           aria-label="Next song"
           className="tap-spring flex size-9 items-center justify-center rounded-full transition-colors hover:bg-white/10"
         >
-          <span className="i-lucide-skip-forward size-4 fill-white" />
+          <span className="icon-[lucide--skip-forward] size-4 fill-white" />
         </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Next song</TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

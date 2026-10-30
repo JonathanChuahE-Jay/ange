@@ -34,7 +34,7 @@ export function Letter({ settings }: { settings: Settings }) {
         <SectionHeading
           kicker="sealed with a kiss"
           title="A love letter"
-          icon="i-lucide-mail"
+          icon="icon-[lucide--mail]"
           note="from my heart to yours"
         />
 
@@ -77,7 +77,7 @@ export function Letter({ settings }: { settings: Settings }) {
                       Par Avion
                     </p>
                     <div className="flex rotate-3 flex-col items-center rounded-sm border-2 border-dashed border-gold/50 bg-white px-2.5 py-1.5">
-                      <span className="i-lucide-heart size-4.5 fill-rose text-rose" aria-hidden />
+                      <span className="icon-[lucide--heart] size-4.5 fill-rose text-rose" aria-hidden />
                       <span className="text-[9px] font-bold tracking-[0.2em] text-gold">LOVE POST</span>
                     </div>
                   </div>
@@ -111,7 +111,7 @@ export function Letter({ settings }: { settings: Settings }) {
                   </div>
 
                   <div className="absolute right-6 bottom-6 flex size-15 items-center justify-center rounded-full bg-rosedeep shadow-lg md:right-8 md:bottom-8">
-                    <span className="i-lucide-heart size-6.5 fill-rosemist text-rosemist" aria-hidden />
+                    <span className="icon-[lucide--heart] size-6.5 fill-rosemist text-rosemist" aria-hidden />
                   </div>
                 </div>
               </div>
@@ -148,7 +148,7 @@ function CssEnvelope({ onOpen }: { onOpen: () => void }) {
           <span className="h-0.5 w-28 rounded bg-white/35" />
         </div>
         <div className="absolute top-1/2 left-1/2 flex size-18 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-ink shadow-xl ring-4 ring-rosedeep/50">
-          <span className="i-lucide-heart size-8 fill-rose text-rose" />
+          <span className="icon-[lucide--heart] size-8 fill-rose text-rose" />
         </div>
       </div>
       <p className="mt-6 text-center font-hand text-2xl text-inksoft transition-colors group-hover:text-rose">
