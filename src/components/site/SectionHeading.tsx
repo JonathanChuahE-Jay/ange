@@ -5,13 +5,12 @@ import BlurText from "@/components/kit/BlurText";
 import ShinyText from "@/components/kit/ShinyText";
 import { cn } from "@/lib/utils";
 
-/** Editorial section heading: glowing icon badge, shiny tracked overline
+/** Editorial section heading: shiny tracked overline
  *  (React Bits ShinyText), blur-in display title (React Bits BlurText),
  *  hand-drawn squiggle that draws itself, optional handwritten note. */
 export function SectionHeading({
   kicker,
   title,
-  icon,
   dark = false,
   note,
 }: {
@@ -23,23 +22,7 @@ export function SectionHeading({
 }) {
   return (
     <div className="relative flex flex-col items-center text-center">
-      <motion.span
-        aria-hidden
-        initial={{ scale: 0.6, opacity: 0, rotate: -12 }}
-        whileInView={{ scale: 1, opacity: 1, rotate: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={{ type: "spring", stiffness: 380, damping: 18 }}
-        className={cn(
-          "relative flex size-13 items-center justify-center rounded-2xl border",
-          dark
-            ? "border-white/20 bg-white/10 text-goldsoft shadow-[0_0_30px_rgb(214_69_96/0.35)]"
-            : "border-line bg-white text-rose shadow-[0_10px_30px_-10px_rgb(214_69_96/0.45)]",
-        )}
-      >
-        <span className={cn(icon, "size-6")} />
-      </motion.span>
-
-      <p className="mt-5 text-[12px] font-bold tracking-[0.35em] uppercase">
+      <p className="text-[12px] font-bold tracking-[0.35em] uppercase">
         <ShinyText
           text={kicker}
           color={dark ? "rgb(243 227 195 / 0.85)" : "#D64560"}
