@@ -1,8 +1,8 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useMotionValue } from "motion/react";
 import dynamic from "next/dynamic";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Settings } from "@/lib/types";
 import { SPRING_DODGE } from "@/lib/motion";
 import { useMutation } from "@tanstack/react-query";
@@ -35,8 +35,17 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
   const [saidYes, setSaidYes] = useState(false);
   const [yesAt, setYesAt] = useState<string | null>(answeredYesAt);
   const [noAttempts, setNoAttempts] = useState(0);
-  const [noPos, setNoPos] = useState({ x: 0, y: 0 });
+  const noX = useMotionValue(0);
+  const noY = useMotionValue(0);
   const dodgeRef = useRef<HTMLDivElement>(null);
+  const noBtnRef = useRef<HTMLButtonElement>(null);
+  const yesBtnRef = useRef<HTMLButtonElement>(null);
+  const pointer = useRef({ x: -9999, y: -9999 });
+  const noBox = useRef({ x: 0, y: 0, w: 0, h: 0 }); // current on-screen box of the No button
+  const yesBox = useRef({ x: 0, y: 0, w: 0, h: 0 });
+  const rafRef = useRef(0);
+  const attemptRef = useRef(0);
+  const nearRef = useRef(false);
 
   const answer = useMutation({
     mutationFn: (a: "yes" | "no") => api.send("/api/answer", "POST", { answer: a }),
@@ -66,15 +75,132 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
     });
   }, [answer]);
 
-  const dodgeNo = useCallback(() => {
+  /**
+   * The No button is a scared little thing: it never sits under the cursor.
+   * Every frame we measure how close the pointer is and push the button away,
+   * so it flees continuously instead of teleporting once — which is what let it
+   * land on top of the Yes button and set off a hover loop.
+   */
+  const flee = useCallback(() => {
+    const container = dodgeRef.current;
+    const b = noBtnRef.current;
+    const y = yesBtnRef.current;
+    if (!container || !b || !y) {
+      rafRef.current = requestAnimationFrame(flee);
+      return;
+    }
+    const cRect = container.getBoundingClientRect();
+    const base = b.getBoundingClientRect();
+    const w = base.width;
+    const h = base.height;
+    const cx = base.x + w / 2;
+    const cy = base.y + h / 2;
+
+    const px = pointer.current.x;
+    const py = pointer.current.y;
+    const pointerKnown = px > -9000;
+    const dist = Math.hypot(px - cx, py - cy);
+    // "danger" = the cursor is close enough that the button should run
+    const danger = w * 0.6 + h * 0.6 + 24;
+    const near = pointerKnown && dist < danger;
+    // an attempt counts only when the cursor is actually ON the button
+    const onIt =
+      pointerKnown && Math.abs(px - cx) < w / 2 + 6 && Math.abs(py - cy) < h / 2 + 6;
+
+    // one attempt per approach (not per frame) so the label doesn't machine-gun
+    if (onIt && !nearRef.current) {
+      nearRef.current = true;
+      setNoAttempts((n) => {
+        const next = Math.min(n + 1, NO_LABELS.length - 1);
+        attemptRef.current = next;
+        return next;
+      });
+    } else if (!near) {
+      nearRef.current = false;
+    }
+
+    let dx = 0;
+    let dy = 0;
+    if (near) {
+      // push away from the pointer
+      const vx = cx - px;
+      const vy = cy - py;
+      const len = Math.hypot(vx, vy) || 1;
+      dx = (vx / len) * 230;
+      dy = (vy / len) * 230;
+      // it lives to the right of the Yes button → it may never flee to the left
+      if (dx < 0) dx = 0;
+      dy = Math.abs(dy) * 0.6 * (vy >= 0 ? 1 : -1) + (vy >= 0 ? 40 : -40);
+    }
+
+    // stay inside the hero
+    const limitX = Math.max(0, Math.min(300, cRect.width / 2 - w / 2));
+    const limitY = Math.max(0, Math.min(160, cRect.height / 2 - h / 2));
+    dx = Math.max(0, Math.min(limitX, dx)); // right only
+    dy = Math.max(-limitY, Math.min(limitY, dy));
+
+    // the button may never end up on top of the Yes button: after computing the
+    // target position, push it clear of the Yes button in one step
+    const yRect = y.getBoundingClientRect();
+    const targetCx = cx + dx;
+    const targetCy = cy + dy;
+    const overlapX =
+      Math.min(targetCx + w / 2, yRect.right) - Math.max(targetCx - w / 2, yRect.left);
+    const overlapY =
+      Math.min(targetCy + h / 2, yRect.bottom) - Math.max(targetCy - h / 2, yRect.top);
+    if (overlapX > 0 && overlapY > 0) {
+      // always resolve to the RIGHT of the Yes button (it can never cross it)
+      dx += overlapX + 18;
+      dy += targetCy < yRect.y + yRect.height / 2 ? -18 : 18;
+    }
+
+    // ease toward the target so it looks like running away, not teleporting —
+    // but never step THROUGH the Yes button: if the straight line would cross it,
+    // jump around instead
+    const curCx = cx;
+    const curCy = cy;
+    const stepX = dx - noX.get();
+    const stepY = dy - noY.get();
+    const toCx = curCx + stepX;
+    const toCy = curCy + stepY;
+    const crosses =
+      Math.min(curCx, toCx) < yRect.right &&
+      Math.max(curCx, toCx) > yRect.left &&
+      Math.min(curCy, toCy) < yRect.bottom &&
+      Math.max(curCy, toCy) > yRect.top;
+    if (crosses) {
+      // step to the right of the Yes button instead of sliding across it
+      const need = yRect.right + w / 2 + 14 - toCx;
+      noX.set(noX.get() + Math.max(need, 12));
+      noY.set(noY.get() + stepY * 0.25);
+    } else {
+      noX.set(noX.get() + stepX * 0.18);
+      noY.set(noY.get() + stepY * 0.18);
+    }
+
+    rafRef.current = requestAnimationFrame(flee);
+  }, []);
+
+  // pointer tracking + the flee loop
+  useEffect(() => {
     if (!settings.noIsDodger) return;
-    const box = dodgeRef.current?.getBoundingClientRect();
-    if (!box) return;
-    // jump somewhere within the hero, away from where it is now
-    const rangeX = Math.min(220, window.innerWidth * 0.28);
-    const x = (Math.random() * 2 - 1) * rangeX;
-    const y = (Math.random() * 2 - 1) * 140;
-    setNoPos({ x, y });
+    const onMove = (e: PointerEvent) => {
+      pointer.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    rafRef.current = requestAnimationFrame(flee);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [settings.noIsDodger, flee]);
+
+  // once the button has run out of labels, it stops being clickable at all
+  const exhausted = noAttempts >= NO_LABELS.length - 1;
+
+  const dodgeNo = useCallback(() => {
+    // clicking or focusing it also counts as an attempt
+    if (!settings.noIsDodger) return;
     setNoAttempts((n) => Math.min(n + 1, NO_LABELS.length - 1));
   }, [settings.noIsDodger]);
 
@@ -156,6 +282,7 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
               </motion.div>
             ) : (
               <motion.div key="asking" className="flex items-center justify-center gap-5">
+                <span ref={yesBtnRef} className="inline-flex">
                 <ShimmerButton
                   onClick={celebrate}
                   background="linear-gradient(135deg, #E25A74 0%, #D64560 45%, #B03052 100%)"
@@ -165,17 +292,22 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
                 >
                   <span className="relative z-10 flex items-center gap-2">Yes <span className="icon-[lucide--heart] size-5" /></span>
                 </ShimmerButton>
+                </span>
+                {/* The No button: pointer-events none → the cursor can never "hover" it,
+                    it just flees. Clicking it is impossible too (it runs away). */}
                 <motion.button
-                  onHoverStart={dodgeNo}
-                  onFocus={dodgeNo}
-                  onTouchStart={dodgeNo}
+                  ref={noBtnRef}
+                  type="button"
+                  tabIndex={-1}
+                  aria-hidden={exhausted ? undefined : true}
                   onClick={() => {
-                    if (settings.noIsDodger) dodgeNo();
+                    if (!settings.noIsDodger) return;
+                    dodgeNo();
                   }}
-                  animate={{ x: noPos.x, y: noPos.y, scale: Math.max(0.55, 1 - noAttempts * 0.08) }}
+                  style={{ x: noX, y: noY, pointerEvents: settings.noIsDodger ? "none" : "auto" }}
+                  animate={{ scale: Math.max(0.55, 1 - noAttempts * 0.08) }}
                   transition={SPRING_DODGE}
-                  className="btn-wipe tap-spring min-h-14 rounded-full border border-white/40 bg-white/5 px-10 text-lg font-semibold text-white/85 backdrop-blur-sm"
-                  style={{ pointerEvents: noAttempts >= NO_LABELS.length - 1 ? "none" : "auto" }}
+                  className="btn-wipe tap-spring flex h-14 min-w-[13rem] items-center justify-center rounded-full border border-white/40 bg-white/5 px-10 text-lg font-semibold text-white/85 backdrop-blur-sm"
                 >
                   {NO_LABELS[noAttempts]}
                 </motion.button>
