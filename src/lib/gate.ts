@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { secureCookie } from "./auth";
 import { db, ensureSeed } from "./db";
 import * as t from "./schema";
 import { ApiError } from "./errors";
@@ -96,7 +97,7 @@ export async function tryUnlock(date: string) {
   (await cookies()).set(COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production" && process.env.ALLOW_INSECURE_COOKIE !== "1",
+    secure: await secureCookie(),
     path: "/",
     maxAge: MAX_AGE,
   });
