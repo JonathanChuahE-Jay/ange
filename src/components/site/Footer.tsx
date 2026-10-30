@@ -1,11 +1,16 @@
 "use client";
 
 import ShinyText from "@/components/kit/ShinyText";
+import dynamic from "next/dynamic";
+import { LazyScene } from "@/components/three/LazyScene";
+
+const LanternScene = dynamic(() => import("@/components/three/LanternScene"), { ssr: false });
 
 export function Footer({ askerName, partnerName }: { askerName: string; partnerName: string }) {
   return (
-    <footer className="relative overflow-hidden bg-gradient-to-b from-dusk1 to-dusk0 px-5 pt-14 pb-28 md:pb-32">
+    <footer className="relative overflow-hidden bg-gradient-to-b from-dusk1 to-dusk0 px-5 pt-24 pb-36 md:pt-28 md:pb-40">
       <div aria-hidden className="stars-layer absolute inset-0 opacity-50" />
+      <LazyScene className="absolute inset-0 opacity-70">{(active) => <LanternScene active={active} />}</LazyScene>
       <div aria-hidden className="absolute inset-0 overflow-hidden">
         <span className="petal left-[18%] text-rose-soft" style={{ animationDuration: "14s" }}>♥</span>
         <span className="petal left-[70%] text-goldsoft" style={{ animationDuration: "18s", animationDelay: "6s" }}>♥</span>

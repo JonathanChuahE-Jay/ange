@@ -8,6 +8,10 @@ import { Meteors } from "@/components/kit/meteors";
 import { BorderBeam } from "@/components/kit/border-beam";
 import { ShimmerButton } from "@/components/kit/shimmer-button";
 import { cn } from "@/lib/utils";
+import dynamic from "next/dynamic";
+import { LazyScene } from "@/components/three/LazyScene";
+
+const KeyholeHeartScene = dynamic(() => import("@/components/three/KeyholeHeartScene"), { ssr: false });
 
 type Field = "d" | "m" | "y";
 const MAX: Record<Field, number> = { d: 2, m: 2, y: 4 };
@@ -90,17 +94,14 @@ export function DateGate() {
           >
             <BorderBeam size={160} duration={9} colorFrom="#D64560" colorTo="#F3E3C3" />
 
-            <motion.span
-              aria-hidden
-              initial={{ scale: 0.5, rotate: -15, opacity: 0 }}
-              animate={{ scale: 1, rotate: 0, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 16, delay: 0.2 }}
-              className="mx-auto flex size-16 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-rosesoft shadow-[0_0_40px_rgb(214_69_96/0.45)]"
-            >
-              <span className="icon-[lucide--lock-keyhole] size-7" />
-            </motion.span>
+            {/* 3D glass heart with a keyhole */}
+            <div className="relative mx-auto -mt-4 h-40 w-full">
+              <LazyScene className="absolute -inset-x-6 inset-y-0">
+                {(active) => <KeyholeHeartScene active={active} opened={busy} />}
+              </LazyScene>
+            </div>
 
-            <p className="mt-6 text-[12px] font-bold tracking-[0.35em] text-goldsoft/85 uppercase">a secret door</p>
+            <p className="mt-2 text-[12px] font-bold tracking-[0.35em] text-goldsoft/85 uppercase">a secret door</p>
             <BlurText
               as="h1"
               text="When did we become us?"

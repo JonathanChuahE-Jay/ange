@@ -7,6 +7,7 @@ import type { Settings } from "@/lib/types";
 import { SPRING_DODGE } from "@/lib/motion";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { LazyScene } from "@/components/three/LazyScene";
 import BlurText from "@/components/kit/BlurText";
 import { TextGenerateEffect } from "@/components/kit/text-generate-effect";
 import { ShimmerButton } from "@/components/kit/shimmer-button";
@@ -93,9 +94,9 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
             "radial-gradient(120% 90% at 50% 110%, #B34A5E 0%, #6E2748 38%, #3A1533 68%, #1C0F22 100%)",
         }}
       />
-      <div aria-hidden className="absolute inset-0 opacity-90">
-        <HeroScene />
-      </div>
+      <LazyScene className="absolute inset-0 opacity-90" rootMargin="0px">
+        {(active) => <HeroScene active={active} />}
+      </LazyScene>
       {/* Aceternity spotlight beams, tinted rose */}
       <div aria-hidden className="pointer-events-none absolute inset-0 hidden md:block">
         <Spotlight

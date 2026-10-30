@@ -5,6 +5,10 @@ import type { Settings } from "@/lib/types";
 import { SectionHeading } from "./SectionHeading";
 import { Meteors } from "@/components/kit/meteors";
 import { BorderBeam } from "@/components/kit/border-beam";
+import dynamic from "next/dynamic";
+import { LazyScene } from "@/components/three/LazyScene";
+
+const ParticleHeartScene = dynamic(() => import("@/components/three/ParticleHeartScene"), { ssr: false });
 
 /**
  * Countdown — spec: numbers/flip-number (split-flap: upper flap falls 150ms
@@ -171,6 +175,10 @@ export function Countdown({ settings }: { settings: Settings }) {
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <Meteors number={18} angle={215} className="bg-rosesoft shadow-[0_0_0_1px_#ffffff10]" />
       </div>
+      {/* beating particle heart behind the timer */}
+      <LazyScene className="absolute inset-0 opacity-80">
+        {(active) => <ParticleHeartScene active={active} />}
+      </LazyScene>
       <div aria-hidden className="absolute top-1/2 left-1/2 size-[38rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose/20 blur-[110px]" />
       <div aria-hidden className="absolute inset-0 overflow-hidden">
         <span className="petal left-[12%] text-rose-soft" style={{ animationDuration: "12s" }}>♥</span>

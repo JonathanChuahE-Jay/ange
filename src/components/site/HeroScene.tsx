@@ -73,9 +73,12 @@ function Rig({ children }: { children: React.ReactNode }) {
   return <group ref={group}>{children}</group>;
 }
 
-export default function HeroScene() {
+export default function HeroScene({ active = true }: { active?: boolean }) {
   return (
     <Canvas
+      frameloop={active ? "always" : "never"}
+      eventSource={typeof document !== "undefined" ? document.documentElement : undefined}
+      eventPrefix="client"
       dpr={[1, 1.75]}
       camera={{ position: [0, 0, 9], fov: 45 }}
       gl={{ antialias: true, alpha: true }}
