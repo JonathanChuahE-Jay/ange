@@ -94,14 +94,17 @@ export function DateGate() {
           >
             <BorderBeam size={160} duration={9} colorFrom="#D64560" colorTo="#F3E3C3" />
 
-            {/* 3D glass heart with a keyhole */}
-            <div className="relative mx-auto -mt-4 h-40 w-full">
-              <LazyScene className="absolute -inset-x-6 inset-y-0">
-                {(active) => <KeyholeHeartScene active={active} opened={busy} />}
-              </LazyScene>
-            </div>
+            <motion.span
+              aria-hidden
+              initial={{ scale: 0.5, rotate: -15, opacity: 0 }}
+              animate={{ scale: 1, rotate: 0, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 16, delay: 0.2 }}
+              className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-rosesoft shadow-[0_0_40px_rgb(214_69_96/0.45)]"
+            >
+              <span className="icon-[lucide--lock-keyhole] size-6" />
+            </motion.span>
 
-            <p className="mt-2 text-[12px] font-bold tracking-[0.35em] text-goldsoft/85 uppercase">a secret door</p>
+            <p className="mt-6 text-[12px] font-bold tracking-[0.35em] text-goldsoft/85 uppercase">a secret door</p>
             <BlurText
               as="h1"
               text="When did we become us?"
@@ -181,11 +184,24 @@ export function DateGate() {
             transition={{ duration: 0.7, ease: [0.215, 0.61, 0.355, 1] }}
             className="relative flex flex-col items-center text-center"
           >
-            <span className="icon-[lucide--heart] size-20 text-rose drop-shadow-[0_0_30px_rgb(214_69_96/0.9)]" />
-            <p className="mt-5 font-display text-4xl text-white">Welcome home</p>
+            {/* the 3D heart flies here (canvas layer); this reserves its space */}
+            <span aria-hidden className="block h-44" />
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.4 }}
+              className="mt-5 font-display text-4xl text-white"
+            >
+              Welcome home
+            </motion.p>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* glass keyhole heart that follows the cursor (click-through) */}
+      <LazyScene className="fixed inset-0 z-30" rootMargin="0px">
+        {(active) => <KeyholeHeartScene active={active} opened={opened} />}
+      </LazyScene>
     </main>
   );
 }
