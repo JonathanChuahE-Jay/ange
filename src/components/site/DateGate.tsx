@@ -10,8 +10,9 @@ import { ShimmerButton } from "@/components/kit/shimmer-button";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { LazyScene } from "@/components/three/LazyScene";
+import { CustomCursor } from "./CustomCursor";
 
-const KeyholeHeartScene = dynamic(() => import("@/components/three/KeyholeHeartScene"), { ssr: false });
+const HeartMascotScene = dynamic(() => import("@/components/three/HeartMascotScene"), { ssr: false });
 
 type Field = "d" | "m" | "y";
 const MAX: Record<Field, number> = { d: 2, m: 2, y: 4 };
@@ -24,6 +25,10 @@ export function DateGate() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [opened, setOpened] = useState(false);
+  const [sad, setSad] = useState(false);
+  const mascotRef = useRef<HTMLDivElement>(null);
+  const doorRef = useRef<HTMLDivElement>(null);
+  const [doorH, setDoorH] = useState<number | undefined>(undefined);
   const refs = { d: useRef<HTMLInputElement>(null), m: useRef<HTMLInputElement>(null), y: useRef<HTMLInputElement>(null) };
   const [scope, animate] = useAnimate();
 
@@ -60,12 +65,16 @@ export function DateGate() {
         body: JSON.stringify({ date }),
       });
       if (res.ok) {
+        // keep the same card height so nothing jumps when "Welcome home" swaps in
+        setDoorH(doorRef.current?.offsetHeight);
         setOpened(true);
-        window.setTimeout(() => router.refresh(), 1100);
+        window.setTimeout(() => router.refresh(), 1600);
         return;
       }
       const body = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
       setError(body?.error?.message ?? "That's not our day. Try again.");
+      setSad(true);
+      window.setTimeout(() => setSad(false), 1600);
       void animate(scope.current, { x: [0, -12, 12, -8, 8, -4, 0] }, { duration: 0.45 });
     } catch {
       setError("Couldn't reach the door. Check your connection.");
@@ -82,29 +91,54 @@ export function DateGate() {
       </div>
       <div aria-hidden className="absolute top-1/2 left-1/2 size-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose/20 blur-[120px]" />
 
-      <AnimatePresence mode="wait">
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="relative mt-36 w-full max-w-md"
+      >
+        {/* heart mascot peeking over the card; its eyes follow the cursor */}
+        <div
+          ref={mascotRef}
+          aria-hidden
+          className="pointer-events-none absolute bottom-full left-1/2 z-0 -mb-[70px] h-[240px] w-[300px] -translate-x-1/2"
+        >
+          <LazyScene className="absolute inset-0" rootMargin="0px">
+            {(active) => (
+              <HeartMascotScene
+                active={active}
+                hostRef={mascotRef}
+                mood={opened ? "happy" : sad ? "error" : busy ? "busy" : "idle"}
+              />
+            )}
+          </LazyScene>
+        </div>
+        {/* paws resting on the card edge (in front of the glass) */}
+        {[-1, 1].map((side) => (
+          <span
+            key={side}
+            aria-hidden
+            className="pointer-events-none absolute top-0 left-1/2 z-20 h-6 w-10 -translate-y-[45%] rounded-full bg-[radial-gradient(circle_at_35%_30%,#FFC1CF_0%,#F27C93_45%,#C9506B_100%)] shadow-[0_4px_10px_-2px_rgb(67_38_58/0.55)]"
+            style={{ marginLeft: side * 52 - 20 }}
+          >
+            <span className="absolute top-1 left-2.5 h-1.5 w-1 rounded-full bg-white/40" />
+            <span className="absolute top-1 left-4.5 h-1.5 w-1 rounded-full bg-white/40" />
+            <span className="absolute top-1 left-6.5 h-1.5 w-1 rounded-full bg-white/40" />
+          </span>
+        ))}
+
+      <AnimatePresence mode="wait" initial={false}>
         {!opened ? (
           <motion.div
+            ref={doorRef}
             key="door"
-            initial={{ opacity: 0, y: 20, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.08, filter: "blur(10px)" }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/15 bg-white/[0.06] px-7 py-10 text-center shadow-[0_30px_80px_-30px_rgb(0_0_0/0.6)] backdrop-blur-xl md:px-10"
+            exit={{ opacity: 0, scale: 0.98, filter: "blur(8px)" }}
+            transition={{ duration: 0.35 }}
+            className="relative z-10 w-full overflow-hidden rounded-[2rem] border border-white/15 bg-white/[0.06] px-7 pt-12 pb-10 text-center shadow-[0_30px_80px_-30px_rgb(0_0_0/0.6)] backdrop-blur-xl md:px-10"
           >
             <BorderBeam size={160} duration={9} colorFrom="#D64560" colorTo="#F3E3C3" />
 
-            <motion.span
-              aria-hidden
-              initial={{ scale: 0.5, rotate: -15, opacity: 0 }}
-              animate={{ scale: 1, rotate: 0, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 16, delay: 0.2 }}
-              className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-rosesoft shadow-[0_0_40px_rgb(214_69_96/0.45)]"
-            >
-              <span className="icon-[lucide--lock-keyhole] size-6" />
-            </motion.span>
-
-            <p className="mt-6 text-[12px] font-bold tracking-[0.35em] text-goldsoft/85 uppercase">a secret door</p>
+            <p className="text-[12px] font-bold tracking-[0.35em] text-goldsoft/85 uppercase">a secret door</p>
             <BlurText
               as="h1"
               text="When did we become us?"
@@ -179,29 +213,19 @@ export function DateGate() {
         ) : (
           <motion.div
             key="open"
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: [0.6, 1.15, 1] }}
-            transition={{ duration: 0.7, ease: [0.215, 0.61, 0.355, 1] }}
-            className="relative flex flex-col items-center text-center"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            style={{ minHeight: doorH }}
+            className="relative z-10 flex w-full flex-col items-center justify-center rounded-[2rem] border border-white/15 bg-white/[0.06] px-7 pt-20 pb-12 text-center backdrop-blur-xl"
           >
-            {/* the 3D heart flies here (canvas layer); this reserves its space */}
-            <span aria-hidden className="block h-44" />
-            <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45, duration: 0.4 }}
-              className="mt-5 font-display text-4xl text-white"
-            >
-              Welcome home
-            </motion.p>
+            <p className="font-display text-4xl text-white">Welcome home</p>
+            <p className="mt-2 font-hand text-2xl text-white/65">I&apos;ve been waiting for you</p>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* glass keyhole heart that follows the cursor (click-through) */}
-      <LazyScene className="fixed inset-0 z-30" rootMargin="0px">
-        {(active) => <KeyholeHeartScene active={active} opened={opened} />}
-      </LazyScene>
+      </motion.div>
+      <CustomCursor />
     </main>
   );
 }

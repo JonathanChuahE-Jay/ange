@@ -588,3 +588,9 @@ button:disabled,
     transform: translateY(105vh) translateX(-12px) rotate(360deg);
   }
 }
+/* Custom cursor (public site, fine pointers only) — the class is added by
+   CustomCursor.tsx, so admin & touch devices keep the native cursor. */
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none !important;
+}

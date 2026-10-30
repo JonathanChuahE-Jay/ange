@@ -16,6 +16,7 @@ import { Wheel } from "./Wheel";
 import { Footer } from "./Footer";
 import { DotNav } from "./DotNav";
 import { TopMusicBar } from "./TopMusicBar";
+import { CustomCursor } from "./CustomCursor";
 import { ScrollProgress } from "@/components/kit/scroll-progress";
 
 export function SitePage({ initial }: { initial: SiteContent }) {
@@ -48,6 +49,7 @@ export function SitePage({ initial }: { initial: SiteContent }) {
       <Wheel prizes={c.prizes} />
       <Footer askerName={c.settings.askerName} partnerName={c.settings.partnerName} />
       <DotNav />
+      <CustomCursor />
     </main>
   );
 }
