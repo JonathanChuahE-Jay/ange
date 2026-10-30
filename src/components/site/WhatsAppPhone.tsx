@@ -171,6 +171,7 @@ export function WhatsAppPhone({ chats, partnerName }: { chats: ChatQuote[]; part
             {/* ---------- messages ---------- */}
             <div
               ref={scrollRef}
+              data-lenis-prevent
               className="no-scrollbar absolute inset-x-0 overflow-y-auto"
               style={{ top: 98, bottom: 84 }}
             >

@@ -17,6 +17,7 @@ import { Footer } from "./Footer";
 import { DotNav } from "./DotNav";
 import { TopMusicBar } from "./TopMusicBar";
 import { CustomCursor } from "./CustomCursor";
+import { SmoothScroll } from "./SmoothScroll";
 import { ScrollProgress } from "@/components/kit/scroll-progress";
 
 export function SitePage({ initial }: { initial: SiteContent }) {
@@ -50,6 +51,7 @@ export function SitePage({ initial }: { initial: SiteContent }) {
       <Footer askerName={c.settings.askerName} partnerName={c.settings.partnerName} />
       <DotNav />
       <CustomCursor />
+      <SmoothScroll />
     </main>
   );
 }

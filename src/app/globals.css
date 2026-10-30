@@ -164,9 +164,8 @@
   }
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* smooth scrolling is handled by Lenis (SmoothScroll.tsx); native
+   scroll-behavior: smooth would fight it */
 
 body {
   background: var(--bg);
