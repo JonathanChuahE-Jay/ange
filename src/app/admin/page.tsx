@@ -5,6 +5,7 @@ import { AdminShell, type AdminTab } from "@/components/admin/AdminShell";
 import { OverviewPanel } from "@/components/admin/OverviewPanel";
 import { StoryForm } from "@/components/admin/StoryForm";
 import { PhotosManager } from "@/components/admin/PhotosManager";
+import { QuizEditor } from "@/components/admin/QuizEditor";
 import { MusicManager } from "@/components/admin/MusicManager";
 import {
   ChatsEditor,
@@ -24,6 +25,7 @@ export default function AdminPage() {
       {tab === "photos" && <PhotosManager />}
       {tab === "chats" && <ChatsEditor />}
       {tab === "loves" && <LovesEditor />}
+      {tab === "quiz" && <QuizEditor />}
       {tab === "music" && <MusicManager />}
       {tab === "prizes" && <PrizesEditor />}
     </AdminShell>

@@ -32,6 +32,9 @@ export const ERROR_CODES = [
   // loves
   "content.loves.not_found",
   "content.loves.invalid",
+  // quiz
+  "content.quiz.not_found",
+  "content.quiz.invalid",
   // prizes
   "content.prizes.not_found",
   "content.prizes.invalid",
@@ -68,6 +71,8 @@ const STATUS_BY_CODE: Record<ErrorCode, number> = {
   "upload.track.unsupported_type": 415,
   "content.loves.not_found": 404,
   "content.loves.invalid": 400,
+  "content.quiz.not_found": 404,
+  "content.quiz.invalid": 400,
   "content.prizes.not_found": 404,
   "content.prizes.invalid": 400,
   "spin.prizes.empty": 409,

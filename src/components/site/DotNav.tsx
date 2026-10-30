@@ -10,6 +10,7 @@ const SECTIONS: DockItem[] = [
   { id: "chats", title: "Chats", icon: "icon-[lucide--message-circle-heart]" },
   { id: "letter", title: "Letter", icon: "icon-[lucide--mail]" },
   { id: "loves", title: "Loves", icon: "icon-[lucide--sparkles]" },
+  { id: "games", title: "Games", icon: "icon-[lucide--gamepad-2]" },
   { id: "countdown", title: "Countdown", icon: "icon-[lucide--timer]" },
   { id: "wheel", title: "Prizes", icon: "icon-[lucide--gift]" },
 ];

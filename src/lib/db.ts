@@ -28,6 +28,43 @@ try {
 } catch {
   // table not created yet — drizzle-kit push will create it with the column
 }
+// v1 migration: quiz table. user_version makes it run exactly once per DB
+// (the table may already exist from a build worker, so "table is new" isn't reliable).
+const QUIZ_SEED = [
+  { question: "Where did we first meet?", options: ["At a café", "Online", "Through friends", "At school"], answerIndex: 2 },
+  { question: "What's our go-to late-night snack?", options: ["Instant noodles", "Ice cream", "Fries", "Toast"], answerIndex: 0 },
+  { question: "Who said “I love you” first?", options: ["Me", "You", "We said it together", "Still waiting"], answerIndex: 0 },
+  { question: "What's my favourite thing about you?", options: ["Your laugh", "Your eyes", "Your kindness", "All of it"], answerIndex: 3 },
+];
+
+try {
+  const version = Number(sqlite.pragma("user_version", { simple: true }) ?? 0);
+  if (version < 1) {
+    sqlite.exec(`CREATE TABLE IF NOT EXISTS quiz_questions (
+      id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+      question text NOT NULL,
+      options text NOT NULL,
+      answer_index integer DEFAULT 0 NOT NULL,
+      position integer DEFAULT 0 NOT NULL,
+      created_at text NOT NULL
+    )`);
+    const count = (sqlite.prepare("SELECT COUNT(*) AS n FROM quiz_questions").get() as { n: number }).n;
+    const hasSettings = !!sqlite.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='settings'").get();
+    sqlite.transaction(() => {
+      // only seed demo questions on installs that already exist; brand-new DBs get them from ensureSeed()
+      if (count === 0 && hasSettings && sqlite.prepare("SELECT 1 FROM settings LIMIT 1").get()) {
+        const ins = sqlite.prepare(
+          "INSERT INTO quiz_questions (question, options, answer_index, position, created_at) VALUES (?, ?, ?, ?, ?)",
+        );
+        const now = new Date().toISOString();
+        QUIZ_SEED.forEach((q, i) => ins.run(q.question, JSON.stringify(q.options), q.answerIndex, i, now));
+      }
+      sqlite.pragma("user_version = 1");
+    })();
+  }
+} catch {
+  // parallel build workers may race here; the next open retries
+}
 
 export const db = drizzle(sqlite, { schema });
 
@@ -41,6 +78,14 @@ function placeholderPhoto(from: string, to: string, glyph: string, words: string
   <text x="450" y="600" font-size="44" fill="#ffffff" opacity="0.92" font-family="Georgia, serif" text-anchor="middle">${words}</text>
 </svg>`;
   return Buffer.from(svg, "utf8");
+}
+
+
+
+function seedQuiz(now: string) {
+  db.insert(schema.quizQuestions)
+    .values(QUIZ_SEED.map((q, i) => ({ ...q, options: JSON.stringify(q.options), position: i, createdAt: now })))
+    .run();
 }
 
 let seeded = false;
@@ -86,6 +131,8 @@ export function ensureSeed() {
       { side: "me", text: "screenshot saved forever 📸❤️", timeLabel: "2:17 am", position: 5, createdAt: now },
     ])
     .run();
+
+  seedQuiz(now);
 
   db.insert(schema.loves)
     .values([

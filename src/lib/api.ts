@@ -5,6 +5,8 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   "auth.password.invalid": "That password isn't right — try again.",
   "auth.session.missing": "Please log in first.",
   "auth.session.expired": "Your session expired — log in again.",
+  "content.quiz.not_found": "That quiz question doesn't exist anymore.",
+  "content.quiz.invalid": "Check the question — it needs 2–4 options and a correct answer.",
   "gate.locked": "This page is locked — enter our first day first.",
   "gate.date.wrong": "That's not our day. Try again.",
   "gate.rate_limited": "Too many tries — wait a few minutes.",

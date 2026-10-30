@@ -14,6 +14,7 @@ export type AdminTab =
   | "photos"
   | "chats"
   | "loves"
+  | "quiz"
   | "music"
   | "prizes";
 
@@ -24,6 +25,7 @@ const TABS: { id: AdminTab; label: string; icon: string }[] = [
   { id: "photos", label: "Photos", icon: "icon-[lucide--image]" },
   { id: "chats", label: "Chats", icon: "icon-[lucide--message-circle]" },
   { id: "loves", label: "Things you love", icon: "icon-[lucide--sparkles]" },
+  { id: "quiz", label: "Quiz game", icon: "icon-[lucide--circle-help]" },
   { id: "music", label: "Music", icon: "icon-[lucide--music]" },
   { id: "prizes", label: "Prize wheel", icon: "icon-[lucide--gift]" },
 ];

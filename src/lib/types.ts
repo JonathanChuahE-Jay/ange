@@ -42,6 +42,13 @@ export type Love = {
   text: string;
 };
 
+export type QuizQuestion = {
+  id: number;
+  question: string;
+  options: string[];
+  answerIndex: number;
+};
+
 export type Track = {
   id: number;
   title: string;
@@ -62,6 +69,7 @@ export type SiteContent = {
   photos: PhotoMeta[];
   chats: ChatQuote[];
   loves: Love[];
+  quiz: QuizQuestion[];
   tracks: Track[];
   prizes: Prize[];
   answeredYesAt: string | null;

@@ -68,6 +68,16 @@ export const loves = sqliteTable("loves", {
   createdAt: text("created_at").notNull(),
 });
 
+/** "How well do you know us?" quiz — options stored as a JSON string array. */
+export const quizQuestions = sqliteTable("quiz_questions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  question: text("question").notNull(),
+  options: text("options").notNull(), // JSON: string[] (2–4)
+  answerIndex: integer("answer_index").notNull().default(0),
+  position: integer("position").notNull().default(0),
+  createdAt: text("created_at").notNull(),
+});
+
 export const tracks = sqliteTable("tracks", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),

@@ -34,6 +34,7 @@ export function getSiteContent({ raw = false }: { raw?: boolean } = {}): SiteCon
     photos: c.photos.map((p) => ({ ...p, caption: n(p.caption) })),
     chats: c.chats.map((x) => ({ ...x, text: n(x.text) })),
     loves: c.loves.map((l) => ({ ...l, emoji: "", text: n(l.text) })),
+    quiz: c.quiz.map((q) => ({ ...q, question: n(q.question), options: q.options.map(n) })),
     tracks: c.tracks.map((x) => ({ ...x, title: n(x.title), artist: n(x.artist) })),
     prizes: c.prizes.map((p) => ({ ...p, emoji: "", label: n(p.label) })),
   };
@@ -51,6 +52,7 @@ function loadContent(): SiteContent {
   const photoRows = db.select().from(t.photos).orderBy(t.photos.position).all();
   const chats = db.select().from(t.chatQuotes).orderBy(t.chatQuotes.position).all();
   const loveRows = db.select().from(t.loves).orderBy(t.loves.position).all();
+  const quizRows = db.select().from(t.quizQuestions).orderBy(t.quizQuestions.position).all();
   const trackRows = db.select().from(t.tracks).orderBy(t.tracks.position).all();
   const prizeRows = db.select().from(t.prizes).orderBy(t.prizes.position).all();
   const answerRows = db.select().from(t.answers).orderBy(desc(t.answers.createdAt)).limit(1).all();
@@ -81,6 +83,16 @@ function loadContent(): SiteContent {
       text: c.text, timeLabel: c.timeLabel, position: c.position,
     })),
     loves: loveRows.map((l) => ({ id: l.id, emoji: l.emoji, text: l.text })),
+    quiz: quizRows.map((q) => {
+      let options: string[] = [];
+      try {
+        const parsed: unknown = JSON.parse(q.options);
+        if (Array.isArray(parsed)) options = parsed.map(String);
+      } catch {
+        options = [];
+      }
+      return { id: q.id, question: q.question, options, answerIndex: q.answerIndex };
+    }).filter((q) => q.options.length >= 2),
     tracks: trackRows.map((s) => ({ id: s.id, title: s.title, artist: s.artist })),
     prizes: prizeRows.map((p) => ({
       id: p.id, label: p.label, emoji: p.emoji, color: p.color, weight: p.weight,
