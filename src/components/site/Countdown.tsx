@@ -114,9 +114,11 @@ function pad(n: number, len = 2) {
 }
 
 export function Countdown({ settings }: { settings: Settings }) {
-  const [now, setNow] = useState(() => Date.now());
+  // null until mounted: server and client clocks differ → hydration mismatch otherwise
+  const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
+    setNow(Date.now());
     const t = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(t);
   }, []);
@@ -134,7 +136,7 @@ export function Countdown({ settings }: { settings: Settings }) {
         <p className="text-sm text-white/45">(it'll appear here the second it's set)</p>
       </div>
     );
-  } else if (now >= target!) {
+  } else if (now !== null && now >= target!) {
     body = (
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose via-rosedeep to-dusk2 px-10 py-12 text-center shadow-2xl">
         <div aria-hidden className="stars-layer absolute inset-0 opacity-60" />
@@ -145,7 +147,7 @@ export function Countdown({ settings }: { settings: Settings }) {
       </div>
     );
   } else {
-    const diff = target! - now;
+    const diff = now === null ? 0 : target! - now;
     const days = Math.floor(diff / 86_400_000);
     const hours = Math.floor(diff / 3_600_000) % 24;
     const minutes = Math.floor(diff / 60_000) % 60;
@@ -154,13 +156,13 @@ export function Countdown({ settings }: { settings: Settings }) {
       <div
         className="relative flex flex-wrap items-start justify-center gap-5 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] px-6 py-8 backdrop-blur-sm md:gap-9 md:px-10"
         role="timer"
-        aria-label={`${days} days, ${hours} hours, ${minutes} minutes remaining`}
+        aria-label={now === null ? "countdown" : `${days} days, ${hours} hours, ${minutes} minutes remaining`}
       >
         <BorderBeam size={140} duration={10} colorFrom="#D64560" colorTo="#F3E3C3" />
-        <FlipGroup value={pad(days, Math.min(3, String(days).length))} label="days" />
-        <FlipGroup value={pad(hours)} label="hours" />
-        <FlipGroup value={pad(minutes)} label="minutes" />
-        <FlipGroup value={pad(seconds)} label="seconds" />
+        <FlipGroup value={now === null ? "--" : pad(days, Math.min(3, String(days).length))} label="days" />
+        <FlipGroup value={now === null ? "--" : pad(hours)} label="hours" />
+        <FlipGroup value={now === null ? "--" : pad(minutes)} label="minutes" />
+        <FlipGroup value={now === null ? "--" : pad(seconds)} label="seconds" />
       </div>
     );
   }
@@ -193,7 +195,7 @@ export function Countdown({ settings }: { settings: Settings }) {
           title="A countdown"
           icon="icon-[lucide--timer]"
         />
-        <p className="mt-5 font-hand text-3xl text-rosemist/90">{settings.countdownTitle}</p>
+        <p className="mt-5 text-center font-hand text-2xl text-rosemist/90 md:text-3xl">{settings.countdownTitle}</p>
         <div className="mt-12 flex justify-center">{body}</div>
       </div>
     </section>

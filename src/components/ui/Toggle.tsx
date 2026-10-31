@@ -14,7 +14,7 @@ export function Toggle({ checked, onChange, label }: ToggleProps) {
   const id = useId();
   return (
     <div className="flex items-center justify-between gap-4">
-      <label htmlFor={id} className="text-[13px] font-semibold text-inksoft">
+      <label htmlFor={id} className="wrap min-w-0 text-[13px] font-semibold text-inksoft">
         {label}
       </label>
       <button

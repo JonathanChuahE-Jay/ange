@@ -136,10 +136,10 @@ export function MusicManager() {
               <span className="icon-[lucide--music] size-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold text-ink">{t.title}</p>
-              <p className="truncate text-[13px] text-inksoft">{t.artist || "—"}</p>
+              <div className="truncate font-semibold text-ink">{t.title}</div>
+              <div className="truncate text-[13px] text-inksoft">{t.artist || "—"}</div>
             </div>
-            <audio controls preload="none" src={`/api/tracks/${t.id}/raw`} className="h-8 max-w-45" />
+            <audio controls preload="none" src={`/api/tracks/${t.id}/raw`} className="order-last h-9 w-full sm:order-none sm:h-8 sm:w-auto sm:max-w-45" />
             <div className="flex shrink-0 gap-1">
               <button
                 onClick={() => {

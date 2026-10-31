@@ -121,6 +121,42 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
 
     let dx = 0;
     let dy = 0;
+    // phones: the buttons are stacked (Yes on top) → flee down / sideways, stay on screen
+    if (window.innerWidth < 640) {
+      const tx = noX.get();
+      const ty = noY.get();
+      const homeCx = cx - tx;
+      const homeCy = cy - ty;
+      if (near) {
+        const vx = cx - px;
+        const vy = cy - py;
+        const len = Math.hypot(vx, vy) || 1;
+        // run to whichever side has more room when the finger is dead-centre
+        const side = Math.abs(vx) < 8 ? (homeCx + tx < window.innerWidth / 2 ? 1 : -1) : Math.sign(vx);
+        dx = tx + side * Math.max(Math.abs(vx / len), 0.6) * 140;
+        dy = Math.max(0, ty + (vy / len) * 90 + 50);
+      } else {
+        dx = tx;
+        dy = ty;
+      }
+      const m = 12;
+      const minDx = m + w / 2 - homeCx;
+      const maxDx = window.innerWidth - m - w / 2 - homeCx;
+      // stay clear of the bottom nav bar (~90px)
+      const maxDy = Math.max(0, Math.min(150, window.innerHeight - 100 - homeCy - h / 2));
+      dx = Math.max(minDx, Math.min(maxDx, dx));
+      dy = Math.max(0, Math.min(maxDy, dy));
+      // pinned in a corner by the finger → hop to the other side
+      if (near && Math.abs(dx - tx) < 2 && Math.abs(dy - ty) < 2) dx = dx > 0 ? minDx : maxDx;
+      // never on top of Yes: push it below
+      const yR = y.getBoundingClientRect();
+      const tTop = homeCy + dy - h / 2;
+      if (tTop < yR.bottom + 10) dy += yR.bottom + 10 - tTop;
+      noX.set(tx + (dx - tx) * 0.25);
+      noY.set(ty + (dy - ty) * 0.25);
+      rafRef.current = requestAnimationFrame(flee);
+      return;
+    }
     if (near) {
       // push away from the pointer
       const vx = cx - px;
@@ -188,9 +224,12 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
       pointer.current = { x: e.clientX, y: e.clientY };
     };
     window.addEventListener("pointermove", onMove, { passive: true });
+    // touch screens fire no pointermove on a tap — the tap itself is the approach
+    window.addEventListener("pointerdown", onMove, { passive: true });
     rafRef.current = requestAnimationFrame(flee);
     return () => {
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onMove);
       cancelAnimationFrame(rafRef.current);
     };
   }, [settings.noIsDodger, flee]);
@@ -281,7 +320,7 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
                 </p>
               </motion.div>
             ) : (
-              <motion.div key="asking" className="flex items-center justify-center gap-5">
+              <motion.div key="asking" className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5">
                 <span ref={yesBtnRef} className="inline-flex">
                 <ShimmerButton
                   onClick={celebrate}
@@ -307,7 +346,7 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
                   style={{ x: noX, y: noY, pointerEvents: settings.noIsDodger ? "none" : "auto" }}
                   animate={{ scale: Math.max(0.55, 1 - noAttempts * 0.08) }}
                   transition={SPRING_DODGE}
-                  className="btn-wipe tap-spring flex h-14 min-w-[13rem] items-center justify-center rounded-full border border-white/40 bg-white/5 px-10 text-lg font-semibold text-white/85 backdrop-blur-sm"
+                  className="btn-wipe tap-spring flex h-14 min-w-[10rem] items-center sm:min-w-[13rem] justify-center rounded-full border border-white/40 bg-white/5 px-10 text-lg font-semibold text-white/85 backdrop-blur-sm"
                 >
                   {NO_LABELS[noAttempts]}
                 </motion.button>

@@ -325,7 +325,7 @@ export function WhatsAppPhone({ chats, partnerName }: { chats: ChatQuote[]; part
       <button
         onClick={replay}
         disabled={!done}
-        className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-inksoft transition-opacity hover:text-rose disabled:pointer-events-none disabled:opacity-0"
+        className="mt-3 flex min-h-11 items-center gap-1.5 px-3 text-sm font-semibold text-inksoft transition-opacity hover:text-rose disabled:pointer-events-none disabled:opacity-0"
       >
         <span className="icon-[lucide--rotate-ccw] size-4" /> replay the chat
       </button>

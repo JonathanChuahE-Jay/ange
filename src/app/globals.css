@@ -195,6 +195,10 @@ textarea,
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }
+/* the rule above is unlayered, so it beats Tailwind's `truncate` utility — restore it */
+.truncate {
+  white-space: nowrap;
+}
 
 /* Convention: pointer affordance everywhere */
 button,

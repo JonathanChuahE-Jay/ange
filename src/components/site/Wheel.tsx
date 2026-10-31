@@ -74,10 +74,12 @@ export function Wheel({ prizes }: { prizes: Prize[] }) {
   function segmentPath(i: number) {
     const a0 = (i * seg - 90) * (Math.PI / 180);
     const a1 = ((i + 1) * seg - 90) * (Math.PI / 180);
-    const x0 = R + R * Math.cos(a0);
-    const y0 = R + R * Math.sin(a0);
-    const x1 = R + R * Math.cos(a1);
-    const y1 = R + R * Math.sin(a1);
+    // rounded: server/client float noise would otherwise cause hydration mismatches
+    const r2 = (n: number) => Math.round(n * 100) / 100;
+    const x0 = r2(R + R * Math.cos(a0));
+    const y0 = r2(R + R * Math.sin(a0));
+    const x1 = r2(R + R * Math.cos(a1));
+    const y1 = r2(R + R * Math.sin(a1));
     const large = seg > 180 ? 1 : 0;
     return `M ${R} ${R} L ${x0} ${y0} A ${R} ${R} 0 ${large} 1 ${x1} ${y1} Z`;
   }
@@ -182,8 +184,8 @@ export function Wheel({ prizes }: { prizes: Prize[] }) {
                 return (
                   <circle
                     key={k}
-                    cx={R + Math.cos(a) * rr}
-                    cy={R + Math.sin(a) * rr}
+                    cx={Math.round((R + Math.cos(a) * rr) * 100) / 100}
+                    cy={Math.round((R + Math.sin(a) * rr) * 100) / 100}
                     r={5}
                     fill="#F3E3C3"
                     className="bulb"
@@ -205,7 +207,7 @@ export function Wheel({ prizes }: { prizes: Prize[] }) {
               {spinning ? "spinning…" : prizes.length === 0 ? "No prizes yet" : "Spin"}
             </span>
           </ShimmerButton>
-          <p className="mt-3 font-hand text-xl text-inksoft">
+          <p className="mt-3 text-center font-hand text-xl text-inksoft">
             one spin = one redeemable prize, screenshot your coupon
           </p>
         </div>

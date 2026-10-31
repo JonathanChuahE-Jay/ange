@@ -134,7 +134,7 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
                   {/* lifted-out slot */}
                   {opened?.index === i && <span className="absolute inset-0 bg-[repeating-linear-gradient(135deg,#FBE9EE_0_8px,#F6DCE2_8px_16px)]" />}
                   {/* hint */}
-                  <span className="pointer-events-none absolute right-2 bottom-2 flex size-8 items-center justify-center rounded-full bg-black/35 text-white opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
+                  <span className="pointer-events-none absolute right-2 bottom-2 flex size-8 items-center justify-center rounded-full bg-black/35 text-white opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 pointer-coarse:opacity-100">
                     <span className="icon-[lucide--play] ml-0.5 size-3.5" />
                   </span>
                 </span>

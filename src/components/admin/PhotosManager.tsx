@@ -272,13 +272,13 @@ function PagedGrid({
           <figcaption className="wrap truncate px-3 py-2 text-[13px] text-inksoft" data-multiline>
             {p.caption || "—"}
           </figcaption>
-          <div className="absolute inset-x-0 top-0 flex justify-end gap-1 p-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+          <div className="absolute inset-x-0 top-0 flex justify-end gap-1 p-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100">
             <button
               onClick={() => onAttachVideo(p)}
               disabled={busyVideo}
               aria-label={p.videoSource === "user" ? "Replace your video" : "Attach your video"}
               title={p.videoSource === "user" ? "Replace your video" : "Attach your video (plays instead of the generated clip)"}
-              className="flex size-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rose disabled:opacity-50"
+              className="flex size-10 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rose disabled:opacity-50"
             >
               <span className="icon-[lucide--clapperboard] size-4" />
             </button>
@@ -287,7 +287,7 @@ function PagedGrid({
                 onClick={() => onRemoveVideo(p)}
                 aria-label="Remove your video"
                 title="Remove your video — the generated clip comes back"
-                className="flex size-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rosedeep"
+                className="flex size-10 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rosedeep"
               >
                 <span className="icon-[lucide--video-off] size-4" />
               </button>
@@ -295,14 +295,14 @@ function PagedGrid({
             <button
               onClick={() => onCaption(p)}
               aria-label="Edit caption"
-              className="flex size-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rose"
+              className="flex size-10 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rose"
             >
               <span className="icon-[lucide--pencil] size-4" />
             </button>
             <button
               onClick={() => onDelete(p)}
               aria-label="Delete photo"
-              className="flex size-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rosedeep"
+              className="flex size-10 items-center justify-center rounded-full bg-white/90 text-ink shadow-md transition-colors hover:text-rosedeep"
             >
               <span className="icon-[lucide--trash-2] size-4" />
             </button>

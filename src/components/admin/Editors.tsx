@@ -360,8 +360,8 @@ export function PrizesEditor() {
         onClose={() => setDraft(null)}
         onSave={save}
       >
-        <div className="grid grid-cols-3 gap-3">
-          <div className="col-span-2">
+        <div>
+          <div>
             <TextField label="Prize" placeholder="Dinner date" value={draft?.label ?? ""} error={errors.label} onChange={(e) => setDraft((d) => (d ? { ...d, label: e.target.value } : d))} />
           </div>
         </div>

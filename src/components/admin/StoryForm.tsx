@@ -100,7 +100,7 @@ export function StoryForm() {
 
   return (
     <form className="flex flex-col gap-6" onSubmit={(e) => { e.preventDefault(); submit(); }}>
-      <fieldset className="rounded-2xl border border-line bg-white p-5">
+      <fieldset className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5">
         <legend className="px-2 font-display text-lg text-ink">The big question</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField label="Your name" value={form.askerName} error={errors.askerName} onChange={(e) => set("askerName", e.target.value)} />
@@ -120,7 +120,7 @@ export function StoryForm() {
         </div>
       </fieldset>
 
-      <fieldset className="rounded-2xl border border-line bg-white p-5">
+      <fieldset className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5">
         <legend className="px-2 font-display text-lg text-ink">Secret door</legend>
         <TextField
           label="Our first day together (unlocks the site)"
@@ -132,7 +132,7 @@ export function StoryForm() {
         />
       </fieldset>
 
-      <fieldset className="rounded-2xl border border-line bg-white p-5">
+      <fieldset className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5">
         <legend className="px-2 font-display text-lg text-ink">Countdown</legend>
         <div className="flex flex-col gap-4">
           <TextField label="Title" value={form.countdownTitle} error={errors.countdownTitle} onChange={(e) => set("countdownTitle", e.target.value)} />
@@ -146,7 +146,7 @@ export function StoryForm() {
         </div>
       </fieldset>
 
-      <fieldset className="rounded-2xl border border-line bg-white p-5">
+      <fieldset className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5">
         <legend className="px-2 font-display text-lg text-ink">Love letter</legend>
         <div className="flex flex-col gap-4">
           <TextField label="Title" value={form.letterTitle} error={errors.letterTitle} onChange={(e) => set("letterTitle", e.target.value)} />
