@@ -1,0 +1,32 @@
+# Render Blueprint — free web service (https://render.com/docs/blueprint-spec)
+# New → Blueprint → pick this repo. Render asks for ADMIN_PASSWORD on first sync.
+#
+# NOTE: the free plan has no persistent disk. The SQLite file lives on the
+# instance's ephemeral filesystem, so admin edits/uploads are wiped on every
+# redeploy, restart, or spin-down after ~15 min idle (the site re-seeds itself
+# with demo content). Upgrade to a paid plan + disk mounted at /var/data and set
+# DATABASE_URL=/var/data/ange.db to keep data.
+services:
+  - type: web
+    name: ange
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    autoDeployTrigger: commit
+    buildCommand: npm ci --include=dev && npx drizzle-kit push --force && npm run build
+    startCommand: npx drizzle-kit push --force && npm start
+    healthCheckPath: /api/version
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        value: ./data/ange.db
+      - key: TRUST_PROXY
+        value: "1"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"

@@ -43,6 +43,20 @@ Configure in `.env.local` (see `.env.example`):
 - Versions: frontend shown in the footer; backend via `/api/version` and the
   `X-App-Version` header on every `/api/*` response
 
+## Deploy free on Render
+
+`render.yaml` is a Render Blueprint on the **free** plan:
+
+1. render.com → **New → Blueprint** → pick this GitHub repo
+2. Enter an `ADMIN_PASSWORD` when asked (`AUTH_SECRET` is generated for you)
+3. Deploy — the site is at `https://ange-xxxx.onrender.com`
+
+Free-plan caveats: the service sleeps after ~15 min idle (first visit takes
+~30–60 s to wake up), and there's **no persistent disk** — the SQLite DB resets to
+the demo content on every redeploy/restart/sleep, so admin edits and uploads don't
+stick. To keep data, upgrade to a paid instance, add a disk at `/var/data` and set
+`DATABASE_URL=/var/data/ange.db`.
+
 ## Hosting on a server later
 
 1. Copy the folder (or `git clone`) to the server, install [mise](https://mise.jdx.dev)
