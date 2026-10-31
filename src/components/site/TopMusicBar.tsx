@@ -63,6 +63,7 @@ export function TopMusicBar({ tracks }: { tracks: Track[] }) {
 
   return (
     <div
+      data-dodge-avoid
       className="fixed top-3 left-1/2 z-50 -translate-x-1/2"
       role="region"
       aria-label="Music player"

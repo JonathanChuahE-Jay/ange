@@ -80,142 +80,156 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
   }, [answer]);
 
   /**
-   * The No button is a scared little thing: it never sits under the cursor.
-   * Every frame we measure how close the pointer is and push the button away,
-   * so it flees continuously instead of teleporting once — which is what let it
-   * land on top of the Yes button and set off a hover loop.
+   * The No button sits still until the cursor ALMOST touches it, then hops a
+   * short way to the nearest free spot — close by, never on top of the Yes
+   * button, the question text, the music bar or the nav, and never off screen.
    */
+  const target = useRef<{ x: number; y: number } | null>(null);
+
   const flee = useCallback(() => {
-    const container = dodgeRef.current;
-    const b = noHomeRef.current;
+    rafRef.current = requestAnimationFrame(flee);
+    const home = noHomeRef.current;
     const mover = noMoverRef.current;
-    const y = yesBtnRef.current;
-    if (!container || !b || !mover || !y) {
-      rafRef.current = requestAnimationFrame(flee);
-      return;
-    }
-    const section = container.closest("section") ?? container;
-    const sRect = section.getBoundingClientRect();
-    // reading the transformed button's rect lags one frame behind the offset, so an
-    // instant jump would get applied twice → measure home, add the motion values
-    const home = b.getBoundingClientRect();
     const btn = noBtnRef.current;
-    // real button size (offset* ignores transforms → no lag); the slot is fixed-width
-    const w = btn ? btn.offsetWidth : home.width;
-    const h = btn ? btn.offsetHeight : home.height;
-    const homeCx = home.x + home.width / 2;
-    const homeCy = home.y + home.height / 2;
+    if (!home || !mover || !btn) return;
+
     const off = OFFSETS.get(mover) ?? { x: 0, y: 0 };
-    const tx = off.x;
-    const ty = off.y;
-    const cx = homeCx + tx;
-    const cy = homeCy + ty;
-    const yR = y.getBoundingClientRect();
-    const mobile = window.innerWidth < 640;
+    const hR = home.getBoundingClientRect();
+    const w = btn.offsetWidth;
+    const h = btn.offsetHeight;
+    const homeCx = hR.x + hR.width / 2;
+    const homeCy = hR.y + hR.height / 2;
+    const cx = homeCx + off.x;
+    const cy = homeCy + off.y;
+
+    // glide toward the current hop target (fast, but visibly a hop — not a teleport)
+    const t = target.current;
+    if (t) {
+      const nx = off.x + (t.x - off.x) * 0.35;
+      const ny = off.y + (t.y - off.y) * 0.35;
+      const done = Math.hypot(t.x - nx, t.y - ny) < 0.5;
+      const fx = done ? t.x : nx;
+      const fy = done ? t.y : ny;
+      OFFSETS.set(mover, { x: fx, y: fy });
+      mover.style.transform = `translate3d(${fx.toFixed(1)}px, ${fy.toFixed(1)}px, 0)`;
+      if (done) target.current = null;
+    }
 
     const px = pointer.current.x;
     const py = pointer.current.y;
-    if (px < -9000) {
-      rafRef.current = requestAnimationFrame(flee);
-      return;
-    }
-    // look ahead along the cursor's motion so a fast flick can't catch it
+    if (px < -9000) return;
     const v = velocity.current;
     if (performance.now() - v.t > 60) {
-      // cursor stopped → its momentum fades
       v.x *= 0.8;
       v.y *= 0.8;
     }
-    const ax = px + v.x * 150;
-    const ay = py + v.y * 150;
 
-    // distance from a point to a button-sized box centred at (bx, by)
-    const gap = (qx: number, qy: number, bx: number, by: number) =>
-      Math.hypot(Math.max(0, Math.abs(qx - bx) - w / 2), Math.max(0, Math.abs(qy - by) - h / 2));
-    const threat = (bx: number, by: number) => Math.min(gap(px, py, bx, by), gap(ax, ay, bx, by));
+    // distance from a point to the button's box if it were centred at (bx, by)
+    const gap = (qx: number, qy: number, bx: number, by: number, ww = w) =>
+      Math.hypot(Math.max(0, Math.abs(qx - bx) - ww / 2), Math.max(0, Math.abs(qy - by) - h / 2));
+    // the label gets longer on every dodge ("You're breaking my heart") → plan the
+    // landing spot for a wider button so the growth can't reach the cursor/text
+    const wNext = w + 70;
+    const mobile = window.innerWidth < 640;
+    const TRIGGER = mobile ? 40 : 26; // "almost touching"
+    const CLEAR = mobile ? 70 : 60; // how far from the cursor it lands
+    // where it's heading (or where it is) is what the cursor must not reach
+    const curX = t ? homeCx + t.x : cx;
+    const curY = t ? homeCy + t.y : cy;
+    const lookX = px + v.x * 50;
+    const lookY = py + v.y * 50;
+    const threat = (bx: number, by: number, ww = w) =>
+      Math.min(gap(px, py, bx, by, ww), gap(lookX, lookY, bx, by, ww));
+    if (threat(curX, curY) >= TRIGGER) return;
 
-    // where the button may go
-    const m = 14;
-    let minX: number, maxX: number, minY: number, maxY: number;
-    if (mobile) {
-      // stacked under Yes: anywhere below it, on screen, above the bottom nav
-      minX = m + w / 2;
-      maxX = window.innerWidth - m - w / 2;
-      minY = Math.max(homeCy, yR.bottom + 10 + h / 2);
-      maxY = Math.max(minY, Math.min(homeCy + 150, window.innerHeight - 100 - h / 2));
-    } else {
-      // desktop: anywhere in the hero (below the music bar, above the dock) —
-      // hitsYes() below keeps it off the Yes button
-      minX = Math.max(sRect.left, 0) + m + w / 2;
-      maxX = Math.min(sRect.right, window.innerWidth) - m - w / 2;
-      minY = Math.max(sRect.top + 100, 100) + h / 2;
-      maxY = Math.min(sRect.bottom, window.innerHeight) - 100 - h / 2;
-      if (maxY < minY) minY = maxY = homeCy;
+    // ---- the cursor is about to touch it → pick the closest free spot ----
+    const PAD = 14;
+    const boxes: DOMRect[] = [];
+    const section = home.closest("section");
+    section
+      ?.querySelectorAll<HTMLElement>("h1, h2, p, a, button, [data-dodge-avoid]")
+      .forEach((el) => {
+        if (el === btn || home.contains(el)) return;
+        const r = el.getBoundingClientRect();
+        if (r.width && r.height) boxes.push(r);
+      });
+    document.querySelectorAll<HTMLElement>("nav, [data-dodge-avoid]").forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.width && r.height) boxes.push(r);
+    });
+    const blocked = (bx: number, by: number, ww = wNext, pad = PAD) =>
+      boxes.some(
+        (r) =>
+          bx + ww / 2 + pad > r.left &&
+          bx - ww / 2 - pad < r.right &&
+          by + h / 2 + pad > r.top &&
+          by - h / 2 - pad < r.bottom,
+      );
+    const M = 10;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const onScreen = (bx: number, by: number) =>
+      bx - wNext / 2 >= M && bx + wNext / 2 <= vw - M && by - h / 2 >= M && by + h / 2 <= vh - M;
+
+    // search rings around where it is now, nearest first; stay near home
+    const RANGE_X = mobile ? vw : 320;
+    const RANGE_Y = mobile ? 220 : 200;
+    // pass 1: a spot it can glide to without crossing the cursor or any text;
+    // pass 2 (cornered): any free spot — it blinks there instantly instead
+    const pick = (needCleanPath: boolean) => {
+      let best: { x: number; y: number; score: number } | null = null;
+      for (let gx = -RANGE_X; gx <= RANGE_X; gx += 16) {
+        for (let gy = -RANGE_Y; gy <= RANGE_Y; gy += 12) {
+          const bx = homeCx + gx;
+          const by = homeCy + gy;
+          if (!onScreen(bx, by) || blocked(bx, by)) continue;
+          const clear = threat(bx, by, wNext);
+          if (clear < CLEAR) continue;
+          if (needCleanPath) {
+            let ok = true;
+            for (let k = 1; k < 8 && ok; k++) {
+              const f = k / 8;
+              const qx = curX + (bx - curX) * f;
+              const qy = curY + (by - curY) * f;
+              if (threat(qx, qy) < 8 || blocked(qx, qy, w, 2)) ok = false;
+            }
+            if (!ok) continue;
+          }
+          // short hops win; mild pull back toward home so it never wanders off
+          const score =
+            Math.hypot(bx - curX, by - curY) + Math.hypot(gx, gy) * 0.35 - Math.min(clear, 160) * 0.2;
+          if (!best || score < best.score) best = { x: gx, y: gy, score };
+        }
+      }
+      return best;
+    };
+    let best = pick(true);
+    let instant = false;
+    if (!best) {
+      best = pick(false);
+      instant = true;
     }
-    const clampX = (x: number) => Math.max(minX, Math.min(maxX, x));
-    const clampY = (yy: number) => Math.max(minY, Math.min(maxY, yy));
-    const hitsYes = (bx: number, by: number) =>
-      bx + w / 2 > yR.left - 12 && bx - w / 2 < yR.right + 12 && by + h / 2 > yR.top - 12 && by - h / 2 < yR.bottom + 12;
+    if (!best) return; // nowhere free (tiny screen) — stay put rather than cover something
+    if (instant) {
+      OFFSETS.set(mover, { x: best.x, y: best.y });
+      mover.style.transform = `translate3d(${best.x}px, ${best.y}px, 0)`;
+      target.current = null;
+    } else {
+      target.current = { x: best.x, y: best.y };
+    }
 
-    const SAFE = mobile ? 70 : 130; // keep at least this much air between cursor and button
-    const d = threat(cx, cy);
-
-    // one attempt per approach: counts when the cursor gets close, resets once it backs off
-    if (d < SAFE * 0.55 && !nearRef.current) {
+    // one attempt per approach (label advances), resets once the cursor backs off
+    if (!nearRef.current) {
       nearRef.current = true;
       setNoAttempts((n) => {
         const next = Math.min(n + 1, NO_LABELS.length - 1);
         attemptRef.current = next;
         return next;
       });
-    } else if (d > SAFE * 1.2) {
-      nearRef.current = false;
+      window.setTimeout(() => {
+        nearRef.current = false;
+      }, 350);
     }
-
-    let goX = cx;
-    let goY = cy;
-    if (d < SAFE) {
-      // push straight away from the cursor, far enough to be safe again
-      let vx = cx - px;
-      let vy = cy - py;
-      const len = Math.hypot(vx, vy) || 1;
-      vx /= len;
-      vy /= len;
-      const push = SAFE - d + 110;
-      goX = clampX(cx + vx * push);
-      goY = clampY(cy + vy * push);
-      // cornered / blocked → jump to the safest spot it's allowed to be
-      if (threat(goX, goY) < SAFE || hitsYes(goX, goY)) {
-        let best = -1;
-        for (let i = 0; i <= 8; i++) {
-          for (let j = 0; j <= 6; j++) {
-            const qx = minX + ((maxX - minX) * i) / 8;
-            const qy = minY + ((maxY - minY) * j) / 6;
-            if (hitsYes(qx, qy)) continue;
-            // prefer far from the cursor, mildly prefer short hops
-            const score = threat(qx, qy) - Math.hypot(qx - cx, qy - cy) * 0.08;
-            if (score > best) {
-              best = score;
-              goX = qx;
-              goY = qy;
-            }
-          }
-        }
-      }
-    } else if (d > SAFE * 2.2 && threat(homeCx, homeCy) > SAFE * 2) {
-      // cursor is well away (and not near home) → wander back home
-      goX = homeCx;
-      goY = homeCy;
-    }
-
-    // speed: snap when the cursor is very close, otherwise a quick ease
-    const k = d < SAFE * 0.75 ? 1 : d < SAFE ? 0.7 : 0.12;
-    const nx = tx + (goX - cx) * k;
-    const ny = ty + (goY - cy) * k;
-    OFFSETS.set(mover, { x: nx, y: ny });
-    mover.style.transform = `translate3d(${nx.toFixed(1)}px, ${ny.toFixed(1)}px, 0)`;
-
-    rafRef.current = requestAnimationFrame(flee);
   }, []);
 
   // pointer tracking + the flee loop
