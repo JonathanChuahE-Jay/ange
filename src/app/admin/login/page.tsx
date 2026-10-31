@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { api, messageForCode } from "@/lib/api";
 import { TextField } from "@/components/ui/Field";
@@ -17,12 +17,30 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string>();
 
+  // already logged in (valid cookie) → skip the form
+  useEffect(() => {
+    let alive = true;
+    api
+      .get<{ authenticated: boolean }>("/api/auth/session")
+      .then((s) => {
+        if (alive && s.authenticated) {
+          qc.setQueryData(["session"], s);
+          router.replace("/admin");
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [qc, router]);
+
   const login = useMutation({
     mutationFn: (pw: string) => api.send("/api/auth/session", "POST", { password: pw }),
     onSuccess: async () => {
       toast("Welcome back");
-      // drop any cached "not authenticated" result so /admin doesn't bounce back here
-      await qc.invalidateQueries({ queryKey: ["session"] });
+      // overwrite any cached "not authenticated" verdict BEFORE navigating —
+      // otherwise /admin reads the stale cache on mount and bounces back here
+      qc.setQueryData(["session"], { authenticated: true });
       router.replace("/admin");
     },
     onError: (e) => setError(messageForCode((e as { code?: string }).code)),

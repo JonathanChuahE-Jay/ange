@@ -72,7 +72,6 @@ function loadContent(): SiteContent {
       questionSubtext: settingsRow?.questionSubtext ?? "",
       yesResponse: settingsRow?.yesResponse ?? "",
       noIsDodger: (settingsRow?.noIsDodger ?? 1) === 1,
-      whatsappPhone: settingsRow?.whatsappPhone ?? "",
       anniversaryDate: settingsRow?.anniversaryDate ?? "",
       countdownTitle: settingsRow?.countdownTitle ?? "",
       countdownTarget: settingsRow?.countdownTarget ?? null,

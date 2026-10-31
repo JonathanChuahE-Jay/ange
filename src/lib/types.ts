@@ -5,7 +5,6 @@ export type Settings = {
   questionSubtext: string;
   yesResponse: string;
   noIsDodger: boolean;
-  whatsappPhone: string;
   anniversaryDate: string;
   countdownTitle: string;
   countdownTarget: string | null;
@@ -88,9 +87,3 @@ export type Paged<T> = {
   hasNext: boolean;
 };
 
-/** wa.me deep link for the scan-to-chat QR (international digits). */
-export function whatsappLink(phone: string, text: string): string | null {
-  const digits = phone.replace(/[^\d]/g, "");
-  if (digits.length < 8) return null;
-  return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
-}

@@ -12,11 +12,6 @@ const bodySchema = z.object({
   questionSubtext: z.string().trim().max(300),
   yesResponse: z.string().trim().min(1).max(400),
   noIsDodger: z.boolean(),
-  whatsappPhone: z
-    .string()
-    .trim()
-    .max(20)
-    .regex(/^[+\d\s-]*$/, "digits, spaces, + and - only"),
   anniversaryDate: z
     .string()
     .trim()
@@ -48,7 +43,6 @@ export async function PUT(req: Request) {
         questionSubtext: body.questionSubtext,
         yesResponse: body.yesResponse,
         noIsDodger: body.noIsDodger ? 1 : 0,
-        whatsappPhone: body.whatsappPhone,
         anniversaryDate: body.anniversaryDate,
         countdownTitle: body.countdownTitle,
         countdownTarget: body.countdownTarget,

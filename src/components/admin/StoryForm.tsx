@@ -16,11 +16,6 @@ const schema = z.object({
   questionSubtext: z.string().trim().max(300),
   yesResponse: z.string().trim().min(1, "Required").max(400),
   noIsDodger: z.boolean(),
-  whatsappPhone: z
-    .string()
-    .trim()
-    .max(20)
-    .regex(/^[+\d\s-]*$/, "Digits, spaces, + and - only"),
   anniversaryDate: z.string().regex(/^(\d{4}-\d{2}-\d{2})?$/, "Pick a date"),
   countdownTitle: z.string().trim().min(1, "Required").max(120),
   countdownTarget: z.string(),
@@ -51,7 +46,6 @@ export function StoryForm() {
         questionSubtext: s.questionSubtext,
         yesResponse: s.yesResponse,
         noIsDodger: s.noIsDodger,
-        whatsappPhone: s.whatsappPhone ?? "",
         anniversaryDate: s.anniversaryDate ?? "",
         countdownTitle: s.countdownTitle,
         countdownTarget: s.countdownTarget ?? "",
@@ -123,14 +117,6 @@ export function StoryForm() {
               label="The “No” button runs away (highly recommended)"
             />
           </div>
-          <TextField
-            label="WhatsApp number (scan-to-reply QR)"
-            placeholder="e.g. 60123456789"
-            hint="International format, digits only — powers the QR next to the chat phone. Leave empty to hide it."
-            value={form.whatsappPhone}
-            error={errors.whatsappPhone}
-            onChange={(e) => set("whatsappPhone", e.target.value)}
-          />
         </div>
       </fieldset>
 

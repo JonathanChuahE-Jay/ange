@@ -53,7 +53,6 @@ SETTINGS = {
     "questionSubtext": "I built you a little corner of the internet. Every page of it is about you.",
     "yesResponse": "You just made me the happiest person alive. Scroll down, there's so much more.",
     "noIsDodger": True,
-    "whatsappPhone": "",  # set your real number in admin to light up the QR
     "anniversaryDate": "2024-02-14",  # the Secret door date (dd/mm/yyyy = 14/02/2024)
     "countdownTitle": "Counting every second until our third Valentine's",
     "countdownTarget": "2027-02-14T11:00:00.000Z",  # 7:00 pm in UTC+8

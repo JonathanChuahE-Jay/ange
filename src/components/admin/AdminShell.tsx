@@ -40,6 +40,7 @@ export function AdminShell({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const qc = useQueryClient();
   const { toast } = useToast();
   const [confirmLogout, setConfirmLogout] = useState(false);
 
@@ -51,15 +52,20 @@ export function AdminShell({
 
   const logout = useMutation({
     mutationFn: () => api.send("/api/auth/session", "DELETE"),
-    onSuccess: () => router.replace("/admin/login"),
+    onSuccess: () => {
+      qc.setQueryData(["session"], { authenticated: false });
+      router.replace("/admin/login");
+    },
     onError: (e) => toast(messageForCode((e as { code?: string }).code), "error"),
   });
 
   useEffect(() => {
+    // only act on a FRESH verdict — never on a cached one still being refetched
+    if (session.isFetching) return;
     if (session.data && !session.data.authenticated) {
       router.replace("/admin/login");
     }
-  }, [session.data, router]);
+  }, [session.data, session.isFetching, router]);
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-bg md:flex-row">

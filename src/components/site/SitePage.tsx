@@ -40,8 +40,6 @@ export function SitePage({ initial }: { initial: SiteContent }) {
       <Chats
         chats={c.chats}
         partnerName={c.settings.partnerName}
-        askerName={c.settings.askerName}
-        whatsappPhone={c.settings.whatsappPhone}
       />
       <Letter settings={c.settings} />
       <Loves loves={c.loves} />

@@ -12,7 +12,7 @@ export const settings = sqliteTable("settings", {
     .notNull()
     .default("Best. Answer. Ever. Scroll down — there's more for you."),
   noIsDodger: integer("no_is_dodger").notNull().default(1),
-  whatsappPhone: text("whatsapp_phone").notNull().default(""),
+  whatsappPhone: text("whatsapp_phone").notNull().default(""), // legacy, unused (kept so existing DBs need no migration)
   /** "YYYY-MM-DD" — the day they became a couple; unlocks the public site */
   anniversaryDate: text("anniversary_date").notNull().default(""),
   countdownTitle: text("countdown_title")
