@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "db:push": "drizzle-kit push",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:snapshot": "node scripts/db-snapshot.mjs save",
+    "db:restore": "node scripts/db-snapshot.mjs restore"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -52,10 +52,20 @@ Configure in `.env.local` (see `.env.example`):
 3. Deploy — the site is at `https://ange-xxxx.onrender.com`
 
 Free-plan caveats: the service sleeps after ~15 min idle (first visit takes
-~30–60 s to wake up), and there's **no persistent disk** — the SQLite DB resets to
-the demo content on every redeploy/restart/sleep, so admin edits and uploads don't
-stick. To keep data, upgrade to a paid instance, add a disk at `/var/data` and set
-`DATABASE_URL=/var/data/ange.db`.
+~30–60 s to wake up), and there's **no persistent disk**. Every deploy/restart/wake
+restores the database from the committed snapshot **`seed/ange.db`** — all photos,
+videos, music and text live inside it. So edits made in the admin panel *on Render*
+vanish on the next restart. To publish content:
+
+```bash
+mise run dev              # edit everything in /admin locally
+npm run db:snapshot       # data/ange.db → seed/ange.db
+git add seed/ange.db && git commit -m "content" && git push   # Render redeploys
+```
+
+(GitHub caps files at 100 MB — the script warns as the snapshot nears that.)
+To keep admin edits on the server instead, use a paid instance + disk at
+`/var/data` and `DATABASE_URL=/var/data/ange.db`.
 
 ## Hosting on a server later
 

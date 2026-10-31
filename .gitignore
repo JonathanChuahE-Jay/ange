@@ -2,7 +2,8 @@ node_modules/
 .next/
 .turbo/
 .npm-cache/
-data/
+data/*
+!data/sample/
 .env.local
 .env
 *.log
