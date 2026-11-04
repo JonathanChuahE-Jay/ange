@@ -189,12 +189,7 @@ export function Countdown({ settings }: { settings: Settings }) {
       </div>
 
       <div className="relative mx-auto flex w-full max-w-4xl flex-col items-center px-5">
-        <SectionHeading
-          dark
-          kicker="tick tock"
-          title="A countdown"
-          icon="icon-[lucide--timer]"
-        />
+        <SectionHeading dark section="countdown" icon="icon-[lucide--timer]" />
         <p className="mt-5 text-center font-hand text-2xl text-rosemist/90 md:text-3xl">{settings.countdownTitle}</p>
         <div className="mt-12 flex justify-center">{body}</div>
       </div>

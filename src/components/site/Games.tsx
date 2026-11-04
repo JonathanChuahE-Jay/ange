@@ -33,7 +33,7 @@ export function Games({ photos, quiz }: { photos: PhotoMeta[]; quiz: QuizQuestio
       </div>
 
       <div className="relative mx-auto max-w-3xl">
-        <SectionHeading kicker="play with me" title="Little games" icon="icon-[lucide--gamepad-2]" note={current.blurb} />
+        <SectionHeading section="games" icon="icon-[lucide--gamepad-2]" note={current.blurb} />
 
         {/* tab switcher with a sliding pill */}
         <div role="tablist" aria-label="Games" className="mx-auto mt-10 flex w-fit max-w-full gap-1 overflow-x-auto rounded-full border border-line bg-white/80 p-1.5 shadow-sm backdrop-blur no-scrollbar">

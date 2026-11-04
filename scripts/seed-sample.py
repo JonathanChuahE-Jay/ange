@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fill the love site with a consistent sample story (Adam & Ange) through the
 admin API, so every item passes the same validation as the admin panel.
-REPLACES existing timeline / photos / chats / loves / quiz / prizes / tracks.
+REPLACES existing timeline / photos / chats / loves / quiz / tracks.
 
 Usage:
   python3 scripts/sample-assets.py      # once: generates data/sample/*
@@ -123,15 +123,6 @@ QUIZ = [
     ("What's my favourite thing about you?", ["Your laugh", "Your eyes", "Your kindness", "All of the above"], 3),
 ]
 
-PRIZES = [
-    ("One big hug", "#D64560", 3),
-    ("Movie night, you pick", "#C9973F", 2),
-    ("Dinner date, my treat", "#B03052", 2),
-    ("Breakfast in bed", "#E8879C", 2),
-    ("Massage coupon", "#8E3B5E", 1),
-    ("A kiss, obviously", "#D98E04", 3),
-]
-
 TRACKS = [
     ("first-light.mp3", "First Light", "Demo track"),
     ("slow-mornings.mp3", "Slow Mornings", "Demo track"),
@@ -153,7 +144,7 @@ def main():
     call("PUT", "/api/admin/settings", json=SETTINGS)
     print("settings ✓  (Secret door: 14/02/2024)")
 
-    for res in ("timeline", "chats", "loves", "quiz", "prizes", "photos", "tracks"):
+    for res in ("timeline", "chats", "loves", "quiz", "photos", "tracks"):
         print(f"cleared {wipe(res)} {res}")
 
     for date, title, desc in TIMELINE:
@@ -164,9 +155,7 @@ def main():
         call("POST", "/api/admin/loves", json={"text": text})
     for q, opts, ans in QUIZ:
         call("POST", "/api/admin/quiz", json={"question": q, "options": opts, "answerIndex": ans})
-    for label, color, weight in PRIZES:
-        call("POST", "/api/admin/prizes", json={"label": label, "color": color, "weight": weight})
-    print(f"added {len(TIMELINE)} timeline · {len(CHATS)} chats · {len(LOVES)} loves · {len(QUIZ)} quiz · {len(PRIZES)} prizes")
+    print(f"added {len(TIMELINE)} timeline · {len(CHATS)} chats · {len(LOVES)} loves · {len(QUIZ)} quiz")
 
     for name, caption in PHOTO_CAPTIONS.items():
         with open(SAMPLE / name, "rb") as fh:

@@ -15,8 +15,7 @@ export type AdminTab =
   | "chats"
   | "loves"
   | "quiz"
-  | "music"
-  | "prizes";
+  | "music";
 
 const TABS: { id: AdminTab; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "icon-[lucide--layout-dashboard]" },
@@ -27,7 +26,6 @@ const TABS: { id: AdminTab; label: string; icon: string }[] = [
   { id: "loves", label: "Things you love", icon: "icon-[lucide--sparkles]" },
   { id: "quiz", label: "Quiz game", icon: "icon-[lucide--circle-help]" },
   { id: "music", label: "Music", icon: "icon-[lucide--music]" },
-  { id: "prizes", label: "Prize wheel", icon: "icon-[lucide--gift]" },
 ];
 
 export function AdminShell({

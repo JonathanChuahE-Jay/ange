@@ -126,7 +126,7 @@ export function Letter({ settings }: { settings: Settings }) {
       </div>
 
       <div className="relative mx-auto flex w-full max-w-3xl flex-col items-center px-5">
-        <SectionHeading kicker="sealed with a kiss" title="A love letter" icon="icon-[lucide--mail]" note="from my heart to yours" />
+        <SectionHeading section="letter" icon="icon-[lucide--mail]" />
 
         <motion.div
           ref={stageRef}

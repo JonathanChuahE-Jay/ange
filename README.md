@@ -2,7 +2,7 @@
 
 A romantic, full-stack single-page website for one very special person —
 timeline, photos, chat quotes, a love letter, things they love, a live
-countdown, Spotify songs and a prize wheel. Every word, photo and prize is
+countdown, little games and songs. Every word, photo and song is
 editable from a private admin panel.
 
 ## Quick start (via mise)
@@ -76,12 +76,12 @@ To keep admin edits on the server instead, use a paid instance + disk at
 4. Put HTTPS in front (Caddy/nginx) — the session cookie is `Secure` in
    production unless `ALLOW_INSECURE_COOKIE=1`
 
-Notes: the site sets `noindex`; there's no rate limiting on the two anonymous
-endpoints (`/api/answer`, `/api/spin`) — fine for a personal server, add a
+Notes: the site sets `noindex`; there's no rate limiting on the anonymous
+endpoint (`/api/answer`) — fine for a personal server, add a
 proxy-level limiter if you expose it publicly.
 
 ## First-run demo content
 
 The database seeds itself with placeholder content (cute placeholder photos,
-sample chats, two songs, six prizes). Replace everything from the admin panel —
+sample chats, two songs). Replace everything from the admin panel —
 the placeholders are clearly marked.

@@ -37,11 +37,7 @@ export const ERROR_CODES = [
   // quiz
   "content.quiz.not_found",
   "content.quiz.invalid",
-  // prizes
-  "content.prizes.not_found",
-  "content.prizes.invalid",
   // misc
-  "spin.prizes.empty",
   "answer.invalid",
   "api.payload.invalid",
   "api.route.not_found",
@@ -77,9 +73,6 @@ const STATUS_BY_CODE: Record<ErrorCode, number> = {
   "content.loves.invalid": 400,
   "content.quiz.not_found": 404,
   "content.quiz.invalid": 400,
-  "content.prizes.not_found": 404,
-  "content.prizes.invalid": 400,
-  "spin.prizes.empty": 409,
   "answer.invalid": 400,
   "api.payload.invalid": 400,
   "api.route.not_found": 404,

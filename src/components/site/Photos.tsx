@@ -25,7 +25,7 @@ type Opened = { index: number; from: Rect; aspect: number };
 /**
  * Photos — a pinned polaroid strip that glides sideways as you scroll down the
  * page (no arrows). Tapping a photo lifts it out of its frame and zooms it to
- * fullscreen, where it turns into its generated motion clip.
+ * fit the screen (never cropped or zoomed); an uploaded video plays there.
  */
 export function Photos({ photos }: { photos: PhotoMeta[] }) {
   const outerRef = useRef<HTMLDivElement>(null);
@@ -76,7 +76,7 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
     return (
       <section id="photos" className="relative scroll-mt-20 py-24">
         <div className="mx-auto w-full max-w-6xl px-5">
-          <SectionHeading kicker="freeze-framed feelings" title="Your photos" icon="icon-[lucide--camera]" />
+          <SectionHeading section="photos" icon="icon-[lucide--camera]" showNote={false} />
         </div>
         <div className="mx-auto mt-14 flex max-w-md flex-col items-center gap-3 rounded-3xl border border-dashed border-line bg-white/70 px-8 py-12 text-center">
           <span className="icon-[lucide--camera] size-8 text-rose/60" aria-hidden />
@@ -92,12 +92,7 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
       <div ref={outerRef} style={{ height: distance + vh }} className="relative">
         <div className="sticky top-0 flex h-[100dvh] flex-col justify-center overflow-hidden pt-14">
           <div className="mx-auto w-full max-w-6xl px-5">
-            <SectionHeading
-              kicker="freeze-framed feelings"
-              title="Your photos"
-              icon="icon-[lucide--camera]"
-              note="keep scrolling · tap one to relive it"
-            />
+            <SectionHeading section="photos" icon="icon-[lucide--camera]" />
           </div>
 
           <motion.div
@@ -187,17 +182,13 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
 function fitRect(aspect: number): Rect {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  // fill the screen on phones; on wide screens fill the height (backdrop fills the sides)
+  // show the whole photo at its true proportions — never crop or zoom it
+  // (the blurred backdrop fills the leftover space)
   let width = vw;
   let height = vw / aspect;
   if (height > vh) {
     height = vh;
     width = vh * aspect;
-  }
-  if (vw / vh < 0.9) {
-    // portrait phone: cover the whole screen for a true fullscreen feel
-    width = vw;
-    height = vh;
   }
   return { top: (vh - height) / 2, left: (vw - width) / 2, width, height };
 }
@@ -218,9 +209,9 @@ function Cinema({
   const [mounted, setMounted] = useState(false);
   const [phase, setPhase] = useState<"in" | "shown" | "out">("in");
   const [videoOn, setVideoOn] = useState(false);
-  // the clip may have finished rendering after this page loaded — always try it,
-  // and only fall back to a CSS Ken Burns if it really isn't there (404)
-  const [noVideo, setNoVideo] = useState(false);
+  // only a video you uploaded plays here; the auto-generated Ken Burns clip
+  // zooms into the photo, so the viewer shows the still photo instead
+  const [noVideo, setNoVideo] = useState(photo.videoSource !== "user");
   const videoRef = useRef<HTMLVideoElement>(null);
   const reduced = useRef(false);
 
@@ -300,13 +291,10 @@ function Cinema({
         className="absolute overflow-hidden shadow-[0_40px_120px_-20px_rgb(0_0_0/0.7)]"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <motion.img
+        <img
           src={src}
           alt={photo.caption || "a photo of us"}
           className="absolute inset-0 size-full object-cover"
-          // no clip yet (still rendering) → gentle Ken Burns so it still feels alive
-          animate={noVideo && phase === "shown" && !reduced.current ? { scale: 1.12 } : { scale: 1 }}
-          transition={{ duration: 7, ease: "easeInOut" }}
         />
         {!noVideo && (
           <video
@@ -318,7 +306,7 @@ function Cinema({
             preload="auto"
             onPlaying={() => setVideoOn(true)}
             onError={() => setNoVideo(true)}
-            className="absolute inset-0 size-full object-cover transition-opacity duration-500"
+            className="absolute inset-0 size-full bg-black object-contain transition-opacity duration-500"
             style={{ opacity: videoOn ? 1 : 0 }}
           />
         )}

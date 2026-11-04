@@ -11,7 +11,7 @@ import { TextArea, TextField } from "@/components/ui/Field";
 import { ChatList } from "./ChatList";
 import { api, messageForCode } from "@/lib/api";
 import { useToast } from "@/components/ui/Toast";
-import type { ChatQuote, Love, Prize, TimelineEvent } from "@/lib/types";
+import type { ChatQuote, Love, TimelineEvent } from "@/lib/types";
 
 type Draft = { id?: number };
 
@@ -293,101 +293,6 @@ export function LovesEditor() {
         open={deleting !== null}
         title="Delete this love?"
         message={`“${deleting?.text}” will be removed.`}
-        confirmLabel="Delete"
-        danger
-        onConfirm={() => { if (deleting) remove.mutate(deleting.id); setDeleting(null); }}
-        onCancel={() => setDeleting(null)}
-      />
-    </>
-  );
-}
-
-/* ---------------- Prizes ---------------- */
-
-const prizeSchema = z.object({
-  label: z.string().trim().min(1, "Prize name").max(80),
-  emoji: z.string().trim().max(8).default(""),
-  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Hex color like #D64560"),
-  weight: z.coerce.number().int().min(1).max(100),
-});
-type PrizeForm = z.input<typeof prizeSchema>;
-
-const PRIZE_COLORS = ["#D64560", "#C9973F", "#B03052", "#E8879C", "#8E3B5E", "#D98E04"];
-
-export function PrizesEditor() {
-  const { list, create, update, remove } = useResource<Prize>("prizes", "/api/admin/prizes");
-  const [draft, setDraft] = useState<(Draft & PrizeForm) | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [deleting, setDeleting] = useState<Prize | null>(null);
-
-  const save = () => {
-    const parsed = prizeSchema.safeParse(draft);
-    if (!parsed.success) {
-      const m: Record<string, string> = {};
-      for (const i of parsed.error.issues) m[String(i.path[0])] = i.message;
-      return setErrors(m);
-    }
-    setErrors({});
-    if (draft?.id) update.mutate({ id: draft.id, body: parsed.data });
-    else create.mutate(parsed.data);
-    setDraft(null);
-  };
-
-  return (
-    <>
-      <ResourceList
-        title="Prize wheel"
-        hint="Weight = how likely it is (1–100). 6–8 prizes look best."
-        items={list.data?.items}
-        loading={list.isPending}
-        onAdd={() => setDraft({ label: "", emoji: "", color: PRIZE_COLORS[0], weight: 1 })}
-        onEdit={(p) => setDraft({ id: p.id, label: p.label, emoji: p.emoji, color: p.color, weight: p.weight })}
-        onDelete={setDeleting}
-        render={(p) => (
-          <div className="flex items-center gap-3">
-            <span className="size-5 shrink-0 rounded-full ring-2 ring-white" style={{ background: p.color }} aria-hidden />
-            <div className="min-w-0">
-              <p className="truncate font-semibold text-ink">{p.label}</p>
-              <p className="text-[13px] text-inksoft">weight {p.weight}</p>
-            </div>
-          </div>
-        )}
-      />
-      <EditorModal
-        open={draft !== null}
-        title={draft?.id ? "Edit prize" : "New prize"}
-        busy={create.isPending || update.isPending}
-        onClose={() => setDraft(null)}
-        onSave={save}
-      >
-        <div>
-          <div>
-            <TextField label="Prize" placeholder="Dinner date" value={draft?.label ?? ""} error={errors.label} onChange={(e) => setDraft((d) => (d ? { ...d, label: e.target.value } : d))} />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <TextField label="Weight (1–100)" type="number" min={1} max={100} value={String(draft?.weight ?? 1)} error={errors.weight} onChange={(e) => setDraft((d) => (d ? { ...d, weight: e.target.value === "" ? 1 : Number(e.target.value) } : d))} />
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[13px] font-semibold text-inksoft">Colour</span>
-            <div className="flex min-h-11 items-center gap-2">
-              {PRIZE_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  aria-label={`Use colour ${c}`}
-                  onClick={() => setDraft((d) => (d ? { ...d, color: c } : d))}
-                  className={`size-8 rounded-full transition-transform hover:scale-110 ${draft?.color === c ? "ring-[3px] ring-ink/60 ring-offset-2" : ""}`}
-                  style={{ background: c }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </EditorModal>
-      <ConfirmDialog
-        open={deleting !== null}
-        title="Delete this prize?"
-        message={`“${deleting?.label}” will be removed from the wheel.`}
         confirmLabel="Delete"
         danger
         onConfirm={() => { if (deleting) remove.mutate(deleting.id); setDeleting(null); }}

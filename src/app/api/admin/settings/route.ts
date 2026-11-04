@@ -4,6 +4,19 @@ import { db, ensureSeed } from "@/lib/db";
 import * as t from "@/lib/schema";
 import { requireAuth } from "@/lib/auth";
 import { route } from "@/lib/handlers";
+import { HEADING_SECTIONS } from "@/lib/headings";
+
+const headingSchema = z.object({
+  kicker: z.string().trim().max(80),
+  title: z.string().trim().min(1).max(120),
+  note: z.string().trim().max(160),
+});
+const headingsSchema = z.object(
+  Object.fromEntries(HEADING_SECTIONS.map((s) => [s.key, headingSchema])) as Record<
+    (typeof HEADING_SECTIONS)[number]["key"],
+    typeof headingSchema
+  >,
+);
 
 const bodySchema = z.object({
   askerName: z.string().trim().min(1).max(60),
@@ -28,6 +41,7 @@ const bodySchema = z.object({
   letterTitle: z.string().trim().min(1).max(120),
   letterBody: z.string().trim().min(1).max(5000),
   letterSignoff: z.string().trim().min(1).max(60),
+  headings: headingsSchema.optional(),
 });
 
 export async function PUT(req: Request) {
@@ -49,6 +63,7 @@ export async function PUT(req: Request) {
         letterTitle: body.letterTitle,
         letterBody: body.letterBody,
         letterSignoff: body.letterSignoff,
+        ...(body.headings ? { headings: JSON.stringify(body.headings) } : {}),
         updatedAt: new Date().toISOString(),
       })
       .where(eq(t.settings.id, 1))

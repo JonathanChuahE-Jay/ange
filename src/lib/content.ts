@@ -3,6 +3,7 @@ import { db, ensureSeed } from "./db";
 import * as t from "./schema";
 import type { SiteContent } from "./types";
 import { ensurePhotoVideos } from "./photoVideo";
+import { parseHeadings, type Headings } from "./headings";
 
 /** Strip emoji / pictographs (the public page is emoji-free by design). */
 const EMOJI_RE =
@@ -30,6 +31,9 @@ export function getSiteContent({ raw = false }: { raw?: boolean } = {}): SiteCon
       letterTitle: n(c.settings.letterTitle),
       letterBody: c.settings.letterBody.replace(EMOJI_RE, ""),
       letterSignoff: n(c.settings.letterSignoff),
+      headings: Object.fromEntries(
+        Object.entries(c.settings.headings).map(([k, h]) => [k, { kicker: n(h.kicker), title: n(h.title), note: n(h.note) }]),
+      ) as Headings,
     },
     timeline: c.timeline.map((e) => ({ ...e, emoji: "", date: n(e.date), title: n(e.title), description: n(e.description) })),
     photos: c.photos.map((p) => ({ ...p, caption: n(p.caption) })),
@@ -37,8 +41,15 @@ export function getSiteContent({ raw = false }: { raw?: boolean } = {}): SiteCon
     loves: c.loves.map((l) => ({ ...l, emoji: "", text: n(l.text) })),
     quiz: c.quiz.map((q) => ({ ...q, question: n(q.question), options: q.options.map(n) })),
     tracks: c.tracks.map((x) => ({ ...x, title: n(x.title), artist: n(x.artist) })),
-    prizes: c.prizes.map((p) => ({ ...p, emoji: "", label: n(p.label) })),
   };
+}
+
+/** Only the lock-screen heading — safe to send before the gate opens. */
+export function getGateHeading() {
+  ensureSeed();
+  const row = db.select({ headings: t.settings.headings }).from(t.settings).limit(1).all()[0];
+  const h = parseHeadings(row?.headings).gate;
+  return { kicker: noEmoji(h.kicker), title: noEmoji(h.title), note: noEmoji(h.note) };
 }
 
 function loadContent(): SiteContent {
@@ -52,7 +63,7 @@ function loadContent(): SiteContent {
     .all();
   // metadata only — never load image/video blobs for the page
   const photoRows = db
-    .select({ id: t.photos.id, caption: t.photos.caption, hasVideo: sql<number>`${t.photos.video} IS NOT NULL` })
+    .select({ id: t.photos.id, caption: t.photos.caption, hasVideo: sql<number>`${t.photos.video} IS NOT NULL`, videoSource: t.photos.videoSource })
     .from(t.photos)
     .orderBy(t.photos.position)
     .all();
@@ -61,7 +72,6 @@ function loadContent(): SiteContent {
   const loveRows = db.select().from(t.loves).orderBy(t.loves.position).all();
   const quizRows = db.select().from(t.quizQuestions).orderBy(t.quizQuestions.position).all();
   const trackRows = db.select().from(t.tracks).orderBy(t.tracks.position).all();
-  const prizeRows = db.select().from(t.prizes).orderBy(t.prizes.position).all();
   const answerRows = db.select().from(t.answers).orderBy(desc(t.answers.createdAt)).limit(1).all();
 
   return {
@@ -78,12 +88,14 @@ function loadContent(): SiteContent {
       letterTitle: settingsRow?.letterTitle ?? "",
       letterBody: settingsRow?.letterBody ?? "",
       letterSignoff: settingsRow?.letterSignoff ?? "",
+      headings: parseHeadings(settingsRow?.headings),
     },
     timeline: timeline.map((e) => ({
       id: e.id, date: e.date, title: e.title, description: e.description,
       emoji: e.emoji, position: e.position,
     })),
-    photos: photoRows.map((p) => ({ id: p.id, caption: p.caption, hasVideo: Boolean(p.hasVideo) })),
+    photos: photoRows.map((p) => ({ id: p.id, caption: p.caption, hasVideo: Boolean(p.hasVideo),
+      videoSource: p.videoSource === "user" ? "user" : p.videoSource === "auto" ? "auto" : null })),
     chats: chats.map((c) => ({
       id: c.id, side: c.side === "partner" ? "partner" : "me",
       text: c.text, timeLabel: c.timeLabel, delayMs: c.delayMs, position: c.position,
@@ -100,9 +112,6 @@ function loadContent(): SiteContent {
       return { id: q.id, question: q.question, options, answerIndex: q.answerIndex };
     }).filter((q) => q.options.length >= 2),
     tracks: trackRows.map((s) => ({ id: s.id, title: s.title, artist: s.artist })),
-    prizes: prizeRows.map((p) => ({
-      id: p.id, label: p.label, emoji: p.emoji, color: p.color, weight: p.weight,
-    })),
     answeredYesAt: answerRows[0]?.answer === "yes" ? answerRows[0].createdAt : null,
   };
 }

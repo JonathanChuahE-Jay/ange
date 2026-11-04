@@ -8,6 +8,7 @@ import { Meteors } from "@/components/kit/meteors";
 import { BorderBeam } from "@/components/kit/border-beam";
 import { ShimmerButton } from "@/components/kit/shimmer-button";
 import { cn } from "@/lib/utils";
+import { DEFAULT_HEADINGS, type Heading } from "@/lib/headings";
 import dynamic from "next/dynamic";
 import { LazyScene } from "@/components/three/LazyScene";
 import { CustomCursor } from "./CustomCursor";
@@ -19,7 +20,7 @@ const MAX: Record<Field, number> = { d: 2, m: 2, y: 4 };
 const PH: Record<Field, string> = { d: "DD", m: "MM", y: "YYYY" };
 
 /** The secret door: enter our first day together to unlock the site. */
-export function DateGate() {
+export function DateGate({ heading = DEFAULT_HEADINGS.gate }: { heading?: Heading }) {
   const router = useRouter();
   const [val, setVal] = useState<Record<Field, string>>({ d: "", m: "", y: "" });
   const [error, setError] = useState<string | null>(null);
@@ -138,17 +139,17 @@ export function DateGate() {
           >
             <BorderBeam size={160} duration={9} colorFrom="#D64560" colorTo="#F3E3C3" />
 
-            <p className="text-[12px] font-bold tracking-[0.35em] text-goldsoft/85 uppercase">a secret door</p>
+            {heading.kicker && <p className="text-[12px] font-bold tracking-[0.35em] text-goldsoft/85 uppercase">{heading.kicker}</p>}
             <BlurText
               as="h1"
-              text="When did we become us?"
+              text={heading.title}
               trigger="load"
               animateBy="words"
               direction="top"
               delay={110}
               className="wrap mt-3 justify-center font-display text-[2.1rem] leading-tight text-white md:text-[2.5rem]"
             />
-            <p className="mt-3 font-hand text-2xl text-white/65">the day it all started</p>
+            {heading.note && <p className="mt-3 font-hand text-2xl text-white/65">{heading.note}</p>}
 
             <form onSubmit={submit} className="mt-8 flex flex-col items-center gap-6">
               <div ref={scope} className="flex items-end justify-center gap-2.5">

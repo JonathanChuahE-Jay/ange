@@ -29,6 +29,8 @@ export const settings = sqliteTable("settings", {
         "Yours, always.",
     ),
   letterSignoff: text("letter_signoff").notNull().default("Yours, always"),
+  /** JSON: per-section { kicker, title, note } overrides (see lib/headings.ts) */
+  headings: text("headings").notNull().default("{}"),
   updatedAt: text("updated_at").notNull(),
 });
 
@@ -96,25 +98,8 @@ export const tracks = sqliteTable("tracks", {
   createdAt: text("created_at").notNull(),
 });
 
-export const prizes = sqliteTable("prizes", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  label: text("label").notNull(),
-  emoji: text("emoji").notNull().default("🎁"),
-  color: text("color").notNull().default("#D64560"),
-  weight: integer("weight").notNull().default(1),
-  position: integer("position").notNull().default(0),
-  createdAt: text("created_at").notNull(),
-});
-
 export const answers = sqliteTable("answers", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   answer: text("answer").notNull(), // 'yes' | 'no'
-  createdAt: text("created_at").notNull(),
-});
-
-export const prizeWins = sqliteTable("prize_wins", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  prizeId: integer("prize_id"),
-  prizeLabel: text("prize_label").notNull(),
   createdAt: text("created_at").notNull(),
 });

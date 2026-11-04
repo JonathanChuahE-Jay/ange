@@ -1,35 +1,49 @@
 "use client";
 
 import { motion } from "motion/react";
+import { createContext, useContext } from "react";
 import BlurText from "@/components/kit/BlurText";
 import ShinyText from "@/components/kit/ShinyText";
 import { cn } from "@/lib/utils";
+import { DEFAULT_HEADINGS, type HeadingKey, type Headings } from "@/lib/headings";
+
+const HeadingsContext = createContext<Headings>(DEFAULT_HEADINGS);
+export const HeadingsProvider = HeadingsContext.Provider;
+export function useHeading(section: HeadingKey) {
+  return useContext(HeadingsContext)[section];
+}
 
 /** Editorial section heading: shiny tracked overline
  *  (React Bits ShinyText), blur-in display title (React Bits BlurText),
  *  hand-drawn squiggle that draws itself, optional handwritten note. */
 export function SectionHeading({
-  kicker,
-  title,
+  section,
   dark = false,
-  note,
+  note: noteOverride,
+  showNote = true,
 }: {
-  kicker: string;
-  title: string;
+  /** which admin-editable heading to show (Admin → Story → Section headings) */
+  section: HeadingKey;
   icon: string;
   dark?: boolean;
+  /** used when the configured note is empty */
   note?: string;
+  showNote?: boolean;
 }) {
+  const h = useHeading(section);
+  const kicker = h.kicker;
+  const title = h.title;
+  const note = showNote ? h.note || noteOverride : undefined;
   return (
     <div className="relative flex flex-col items-center text-center">
-      <p className="text-[12px] font-bold tracking-[0.35em] uppercase">
+      {kicker && <p className="text-[12px] font-bold tracking-[0.35em] uppercase">
         <ShinyText
           text={kicker}
           color={dark ? "rgb(243 227 195 / 0.85)" : "#D64560"}
           shineColor={dark ? "#ffffff" : "#F3C98B"}
           speed={3.2}
         />
-      </p>
+      </p>}
 
       <BlurText
         as="h2"

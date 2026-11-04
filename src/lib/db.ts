@@ -93,6 +93,24 @@ try {
       sqlite.pragma("user_version = 4");
     })();
   }
+  // v5: editable section headings
+  if (Number(sqlite.pragma("user_version", { simple: true }) ?? 0) < 5) {
+    sqlite.transaction(() => {
+      const cols = sqlite.prepare("PRAGMA table_info(settings)").all() as { name: string }[];
+      if (cols.length > 0 && !cols.some((c) => c.name === "headings")) {
+        sqlite.exec("ALTER TABLE settings ADD COLUMN headings text NOT NULL DEFAULT '{}'");
+      }
+      sqlite.pragma("user_version = 5");
+    })();
+  }
+  // v6: prize wheel removed for good — drop its tables
+  if (Number(sqlite.pragma("user_version", { simple: true }) ?? 0) < 6) {
+    sqlite.transaction(() => {
+      sqlite.exec("DROP TABLE IF EXISTS prize_wins");
+      sqlite.exec("DROP TABLE IF EXISTS prizes");
+      sqlite.pragma("user_version = 6");
+    })();
+  }
 } catch {
   // parallel build workers may race here; the next open retries
 }
@@ -176,14 +194,4 @@ export function ensureSeed() {
     ])
     .run();
 
-  db.insert(schema.prizes)
-    .values([
-      { label: "One big hug", emoji: "🫂", color: "#D64560", weight: 3, position: 0, createdAt: now },
-      { label: "Movie night — you pick", emoji: "🎬", color: "#C9973F", weight: 2, position: 1, createdAt: now },
-      { label: "Dinner date", emoji: "🍽️", color: "#B03052", weight: 1, position: 2, createdAt: now },
-      { label: "Breakfast in bed", emoji: "🥞", color: "#E8879C", weight: 1, position: 3, createdAt: now },
-      { label: "Massage coupon", emoji: "💆", color: "#C9973F", weight: 2, position: 4, createdAt: now },
-      { label: "A kiss, obviously", emoji: "💋", color: "#D64560", weight: 3, position: 5, createdAt: now },
-    ])
-    .run();
 }

@@ -9,7 +9,6 @@ import { useToast } from "@/components/ui/Toast";
 type Overview = {
   latestAnswer: { answer: string; at: string } | null;
   yesAt: string | null;
-  prizeWins: { id: number; prizeLabel: string; at: string }[];
   counts: Record<string, number>;
 };
 
@@ -47,7 +46,6 @@ export function OverviewPanel() {
     { label: "Chat quotes", value: data.counts.chats, icon: "icon-[lucide--message-circle]" },
     { label: "Loves", value: data.counts.loves, icon: "icon-[lucide--sparkles]" },
     { label: "Songs", value: data.counts.tracks, icon: "icon-[lucide--music]" },
-    { label: "Prizes", value: data.counts.prizes, icon: "icon-[lucide--gift]" },
   ];
 
   return (
@@ -110,30 +108,6 @@ export function OverviewPanel() {
             <p className="text-[13px] text-inksoft">{c.label}</p>
           </div>
         ))}
-      </div>
-
-      {/* prize wins */}
-      <div>
-        <h2 className="font-display text-2xl text-ink">Wheel spins</h2>
-        {data.prizeWins.length === 0 ? (
-          <p className="mt-3 rounded-2xl border border-dashed border-line bg-white px-5 py-6 text-center text-sm text-inksoft">
-            No spins yet.
-          </p>
-        ) : (
-          <ul className="mt-3 flex flex-col gap-2">
-            {data.prizeWins.map((w) => (
-              <li
-                key={w.id}
-                className="flex items-center justify-between rounded-xl border border-line bg-white px-4 py-3 text-sm"
-              >
-                <span className="font-semibold text-ink">{w.prizeLabel}</span>
-                <span className="text-inksoft">
-                  {new Date(w.at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );

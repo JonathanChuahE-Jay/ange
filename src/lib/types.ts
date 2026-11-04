@@ -1,3 +1,5 @@
+import type { Headings } from "./headings";
+
 export type Settings = {
   askerName: string;
   partnerName: string;
@@ -11,6 +13,7 @@ export type Settings = {
   letterTitle: string;
   letterBody: string;
   letterSignoff: string;
+  headings: Headings;
 };
 
 export type TimelineEvent = {
@@ -27,6 +30,8 @@ export type PhotoMeta = {
   caption: string;
   /** a generated motion clip is ready at /api/photos/:id/video */
   hasVideo: boolean;
+  /** where the clip came from: generated Ken Burns ('auto') or uploaded ('user') */
+  videoSource: "auto" | "user" | null;
 };
 
 export type ChatQuote = {
@@ -58,14 +63,6 @@ export type Track = {
   artist: string;
 };
 
-export type Prize = {
-  id: number;
-  label: string;
-  emoji: string;
-  color: string;
-  weight: number;
-};
-
 export type SiteContent = {
   settings: Settings;
   timeline: TimelineEvent[];
@@ -74,7 +71,6 @@ export type SiteContent = {
   loves: Love[];
   quiz: QuizQuestion[];
   tracks: Track[];
-  prizes: Prize[];
   answeredYesAt: string | null;
 };
 

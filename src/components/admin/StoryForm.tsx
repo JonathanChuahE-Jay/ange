@@ -8,6 +8,13 @@ import type { Settings, SiteContent } from "@/lib/types";
 import { TextField, TextArea } from "@/components/ui/Field";
 import { Toggle } from "@/components/ui/Toggle";
 import { useToast } from "@/components/ui/Toast";
+import { HEADING_SECTIONS, type Headings, type HeadingKey, type Heading } from "@/lib/headings";
+
+const headingSchema = z.object({
+  kicker: z.string().trim().max(80),
+  title: z.string().trim().min(1, "Required").max(120),
+  note: z.string().trim().max(160),
+});
 
 const schema = z.object({
   askerName: z.string().trim().min(1, "Required").max(60),
@@ -22,9 +29,10 @@ const schema = z.object({
   letterTitle: z.string().trim().min(1, "Required").max(120),
   letterBody: z.string().trim().min(1, "Required").max(5000),
   letterSignoff: z.string().trim().min(1, "Required").max(60),
+  headings: z.record(z.string(), headingSchema),
 });
 
-type FormState = z.input<typeof schema>;
+type FormState = Omit<z.input<typeof schema>, "headings"> & { headings: Headings };
 
 export function StoryForm() {
   const qc = useQueryClient();
@@ -52,6 +60,7 @@ export function StoryForm() {
         letterTitle: s.letterTitle,
         letterBody: s.letterBody,
         letterSignoff: s.letterSignoff,
+        headings: s.headings,
       });
     }
   }, [site.data, form]);
@@ -77,17 +86,21 @@ export function StoryForm() {
 
   const set = (key: keyof FormState, value: string | boolean) =>
     setForm((f) => (f ? { ...f, [key]: value } : f));
+  const setHeading = (section: HeadingKey, field: keyof Heading, value: string) =>
+    setForm((f) =>
+      f ? { ...f, headings: { ...f.headings, [section]: { ...f.headings[section], [field]: value } } } : f,
+    );
 
   const submit = () => {
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
       const map: Record<string, string> = {};
-      for (const issue of parsed.error.issues) map[String(issue.path[0])] = issue.message;
+      for (const issue of parsed.error.issues) map[issue.path.map(String).join(".")] = issue.message;
       setErrors(map);
       return;
     }
     setErrors({});
-    save.mutate(parsed.data);
+    save.mutate(parsed.data as FormState);
   };
 
   const dtValue = (() => {
@@ -152,6 +165,34 @@ export function StoryForm() {
           <TextField label="Title" value={form.letterTitle} error={errors.letterTitle} onChange={(e) => set("letterTitle", e.target.value)} />
           <TextArea label="Letter body" rows={10} className="min-h-48" value={form.letterBody} error={errors.letterBody} onChange={(e) => set("letterBody", e.target.value)} />
           <TextField label="Sign-off" value={form.letterSignoff} error={errors.letterSignoff} onChange={(e) => set("letterSignoff", e.target.value)} />
+        </div>
+      </fieldset>
+
+      <fieldset className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5">
+        <legend className="px-2 font-display text-lg text-ink">Section headings</legend>
+        <p className="mb-4 text-sm text-inksoft">
+          The small overline, big title and handwritten note above each section. Leave the overline or note empty to hide it.
+        </p>
+        <div className="flex flex-col gap-4">
+          {HEADING_SECTIONS.map(({ key, label }) => {
+            const h = form.headings[key];
+            return (
+              <div key={key} className="rounded-xl border border-line/70 bg-rosemist/20 p-3 sm:p-4">
+                <p className="mb-3 text-sm font-bold text-ink">{label}</p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <TextField label="Overline" value={h.kicker} error={errors[`headings.${key}.kicker`]} onChange={(e) => setHeading(key, "kicker", e.target.value)} />
+                  <TextField label="Title" value={h.title} error={errors[`headings.${key}.title`]} onChange={(e) => setHeading(key, "title", e.target.value)} />
+                  <TextField
+                    label="Note"
+                    value={h.note}
+                    error={errors[`headings.${key}.note`]}
+                    hint={key === "games" ? "Empty = each game's own blurb" : undefined}
+                    onChange={(e) => setHeading(key, "note", e.target.value)}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </fieldset>
 

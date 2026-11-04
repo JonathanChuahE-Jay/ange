@@ -11,7 +11,7 @@ import { useEffect } from "react";
  * - Skipped entirely for prefers-reduced-motion.
  * - `<a href="#section">` links (dock, "scroll for your surprises") glide there.
  * - Pauses automatically while anything locks page scroll: the photo viewer sets
- *   html overflow:hidden; Radix dialogs (prize wheel) set body[data-scroll-locked].
+ *   html overflow:hidden; Radix dialogs set body[data-scroll-locked].
  * - Inner scroll areas opt out with data-lenis-prevent (e.g. the WhatsApp chat).
  */
 export function SmoothScroll() {

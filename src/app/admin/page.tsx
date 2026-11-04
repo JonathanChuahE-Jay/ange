@@ -10,7 +10,6 @@ import { MusicManager } from "@/components/admin/MusicManager";
 import {
   ChatsEditor,
   LovesEditor,
-  PrizesEditor,
   TimelineEditor,
 } from "@/components/admin/Editors";
 
@@ -27,7 +26,6 @@ export default function AdminPage() {
       {tab === "loves" && <LovesEditor />}
       {tab === "quiz" && <QuizEditor />}
       {tab === "music" && <MusicManager />}
-      {tab === "prizes" && <PrizesEditor />}
     </AdminShell>
   );
 }

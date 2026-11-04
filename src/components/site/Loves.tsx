@@ -51,12 +51,7 @@ export function Loves({ loves }: { loves: Love[] }) {
       </div>
 
       <div className="px-5">
-        <SectionHeading
-          kicker="the little things"
-          title="Things you love"
-          icon="icon-[lucide--sparkles]"
-          note="collect them all"
-        />
+        <SectionHeading section="loves" icon="icon-[lucide--sparkles]" />
       </div>
 
       <div className="relative mt-14 flex flex-col gap-3">

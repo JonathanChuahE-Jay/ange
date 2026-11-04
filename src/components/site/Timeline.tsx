@@ -57,12 +57,7 @@ export function Timeline({ events }: { events: TEvent[] }) {
       </div>
 
       <div className="relative">
-        <SectionHeading
-          kicker="chapter by chapter"
-          title="Your timeline"
-          icon="icon-[lucide--book-heart]"
-          note="every chapter has you in it"
-        />
+        <SectionHeading section="timeline" icon="icon-[lucide--book-heart]" />
 
         {/* pb = hold room below the last card: sticky can only pin while there is
             container beneath it, so the final chapter holds the stack before leaving */}

@@ -21,12 +21,7 @@ export function Chats({
       </div>
 
       <div className="relative mx-auto w-full max-w-5xl px-5">
-        <SectionHeading
-          kicker="exhibit A, your honor"
-          title="What your chats say"
-          icon="icon-[lucide--message-circle-heart]"
-          note="the receipts"
-        />
+        <SectionHeading section="chats" icon="icon-[lucide--message-circle-heart]" />
 
         <div className="relative mt-16 flex justify-center">
           {/* WhatsApp for iPhone — plays the conversation live */}
