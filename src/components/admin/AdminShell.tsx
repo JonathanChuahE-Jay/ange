@@ -19,7 +19,7 @@ export type AdminTab =
 
 const TABS: { id: AdminTab; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "icon-[lucide--layout-dashboard]" },
-  { id: "story", label: "Question & Letter", icon: "icon-[lucide--heart]" },
+  { id: "story", label: "Question, Letter & Titles", icon: "icon-[lucide--heart]" },
   { id: "timeline", label: "Timeline", icon: "icon-[lucide--milestone]" },
   { id: "photos", label: "Photos", icon: "icon-[lucide--image]" },
   { id: "chats", label: "Chats", icon: "icon-[lucide--message-circle]" },

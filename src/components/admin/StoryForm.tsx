@@ -169,9 +169,9 @@ export function StoryForm() {
       </fieldset>
 
       <fieldset className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5">
-        <legend className="px-2 font-display text-lg text-ink">Section headings</legend>
+        <legend className="px-2 font-display text-lg text-ink">Section titles &amp; subtitles (all sections)</legend>
         <p className="mb-4 text-sm text-inksoft">
-          The small overline, big title and handwritten note above each section. Leave the overline or note empty to hide it.
+          e.g. “freeze-framed feelings” / “Your photos” / “keep scrolling · tap one to relive it”. Leave the overline or subtitle empty to hide it.
         </p>
         <div className="flex flex-col gap-4">
           {HEADING_SECTIONS.map(({ key, label }) => {
@@ -180,10 +180,10 @@ export function StoryForm() {
               <div key={key} className="rounded-xl border border-line/70 bg-rosemist/20 p-3 sm:p-4">
                 <p className="mb-3 text-sm font-bold text-ink">{label}</p>
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <TextField label="Overline" value={h.kicker} error={errors[`headings.${key}.kicker`]} onChange={(e) => setHeading(key, "kicker", e.target.value)} />
+                  <TextField label="Overline (small text above)" value={h.kicker} error={errors[`headings.${key}.kicker`]} onChange={(e) => setHeading(key, "kicker", e.target.value)} />
                   <TextField label="Title" value={h.title} error={errors[`headings.${key}.title`]} onChange={(e) => setHeading(key, "title", e.target.value)} />
                   <TextField
-                    label="Note"
+                    label="Subtitle (handwritten, below)"
                     value={h.note}
                     error={errors[`headings.${key}.note`]}
                     hint={key === "games" ? "Empty = each game's own blurb" : undefined}

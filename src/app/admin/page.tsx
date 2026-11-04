@@ -7,6 +7,7 @@ import { StoryForm } from "@/components/admin/StoryForm";
 import { PhotosManager } from "@/components/admin/PhotosManager";
 import { QuizEditor } from "@/components/admin/QuizEditor";
 import { MusicManager } from "@/components/admin/MusicManager";
+import { HeadingEditor } from "@/components/admin/HeadingEditor";
 import {
   ChatsEditor,
   LovesEditor,
@@ -20,11 +21,11 @@ export default function AdminPage() {
     <AdminShell tab={tab} onTab={setTab}>
       {tab === "overview" && <OverviewPanel />}
       {tab === "story" && <StoryForm />}
-      {tab === "timeline" && <TimelineEditor />}
-      {tab === "photos" && <PhotosManager />}
-      {tab === "chats" && <ChatsEditor />}
-      {tab === "loves" && <LovesEditor />}
-      {tab === "quiz" && <QuizEditor />}
+      {tab === "timeline" && <><HeadingEditor key="timeline" section="timeline" /><TimelineEditor /></>}
+      {tab === "photos" && <><HeadingEditor key="photos" section="photos" /><PhotosManager /></>}
+      {tab === "chats" && <><HeadingEditor key="chats" section="chats" /><ChatsEditor /></>}
+      {tab === "loves" && <><HeadingEditor key="loves" section="loves" /><LovesEditor /></>}
+      {tab === "quiz" && <><HeadingEditor key="games" section="games" /><QuizEditor /></>}
       {tab === "music" && <MusicManager />}
     </AdminShell>
   );
