@@ -226,6 +226,23 @@ export function WhatsAppPhone({ chats, partnerName }: { chats: ChatQuote[]; part
                       </motion.div>
                     );
                   })}
+                  {/* her "typing…" bubble — three bouncing dots where her message will land */}
+                  {typing && (
+                    <motion.div
+                      key="typing"
+                      layout="position"
+                      initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.12 } }}
+                      transition={{ type: "spring", stiffness: 520, damping: 34 }}
+                      className={cn(
+                        "flex w-full justify-start",
+                        visible.length > 0 && visible[visible.length - 1].side === "partner" ? "mt-[2px]" : "mt-[8px]",
+                      )}
+                    >
+                      <TypingBubble />
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </div>
             </div>
@@ -393,6 +410,28 @@ function Bubble({
           </svg>
         </motion.span>
       )}
+    </div>
+  );
+}
+
+/** WhatsApp's incoming "typing…" bubble: three grey dots bouncing in turn */
+function TypingBubble() {
+  return (
+    <div
+      aria-label="typing"
+      className="relative flex h-[36px] items-center gap-[5px] rounded-[18px] rounded-bl-[4px] bg-white px-[14px] shadow-[0_1px_0.5px_rgb(11_20_26/0.13)]"
+    >
+      {[0, 1, 2].map((d) => (
+        <motion.span
+          key={d}
+          className="block size-[8px] rounded-full bg-[#8E8E93]"
+          animate={{ y: [0, -4, 0], opacity: [0.45, 1, 0.45] }}
+          transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut", delay: d * 0.15 }}
+        />
+      ))}
+      <svg aria-hidden viewBox="0 0 11 17" className="absolute bottom-0 h-[17px] w-[11px]" style={{ left: -6 }}>
+        <path d="M11 0v17H1.5C.4 17-.1 15.7.7 15 4.9 11.4 9.4 6.6 11 0Z" fill="#FFFFFF" />
+      </svg>
     </div>
   );
 }
