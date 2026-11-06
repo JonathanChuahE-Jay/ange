@@ -111,6 +111,26 @@ try {
       sqlite.pragma("user_version = 6");
     })();
   }
+  // v7: sound on/off per uploaded photo video
+  if (Number(sqlite.pragma("user_version", { simple: true }) ?? 0) < 7) {
+    sqlite.transaction(() => {
+      const cols = sqlite.prepare("PRAGMA table_info(photos)").all() as { name: string }[];
+      if (cols.length > 0 && !cols.some((c) => c.name === "video_sound")) {
+        sqlite.exec("ALTER TABLE photos ADD COLUMN video_sound integer NOT NULL DEFAULT 0");
+      }
+      sqlite.pragma("user_version = 7");
+    })();
+  }
+  // v8: editable footer text
+  if (Number(sqlite.pragma("user_version", { simple: true }) ?? 0) < 8) {
+    sqlite.transaction(() => {
+      const cols = sqlite.prepare("PRAGMA table_info(settings)").all() as { name: string }[];
+      if (cols.length > 0 && !cols.some((c) => c.name === "footer_text")) {
+        sqlite.exec("ALTER TABLE settings ADD COLUMN footer_text text NOT NULL DEFAULT 'Once again, Happy 27th Birthday! Made with love 💕'");
+      }
+      sqlite.pragma("user_version = 8");
+    })();
+  }
 } catch {
   // parallel build workers may race here; the next open retries
 }

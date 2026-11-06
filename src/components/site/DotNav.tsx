@@ -8,9 +8,8 @@ const SECTIONS: DockItem[] = [
   { id: "timeline", title: "Timeline", icon: "icon-[lucide--book-heart]" },
   { id: "photos", title: "Photos", icon: "icon-[lucide--camera]" },
   { id: "chats", title: "Chats", icon: "icon-[lucide--message-circle-heart]" },
-  { id: "letter", title: "Letter", icon: "icon-[lucide--mail]" },
   { id: "loves", title: "Loves", icon: "icon-[lucide--sparkles]" },
-  { id: "games", title: "Games", icon: "icon-[lucide--gamepad-2]" },
+  { id: "letter", title: "Letter", icon: "icon-[lucide--mail]" },
   { id: "countdown", title: "Countdown", icon: "icon-[lucide--timer]" },
 ];
 

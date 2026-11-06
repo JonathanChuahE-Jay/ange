@@ -31,6 +31,7 @@ export function getSiteContent({ raw = false }: { raw?: boolean } = {}): SiteCon
       letterTitle: n(c.settings.letterTitle),
       letterBody: c.settings.letterBody.replace(EMOJI_RE, ""),
       letterSignoff: n(c.settings.letterSignoff),
+      footerText: n(c.settings.footerText),
       headings: Object.fromEntries(
         Object.entries(c.settings.headings).map(([k, h]) => [k, { kicker: n(h.kicker), title: n(h.title), note: n(h.note) }]),
       ) as Headings,
@@ -63,7 +64,7 @@ function loadContent(): SiteContent {
     .all();
   // metadata only — never load image/video blobs for the page
   const photoRows = db
-    .select({ id: t.photos.id, caption: t.photos.caption, hasVideo: sql<number>`${t.photos.video} IS NOT NULL`, videoSource: t.photos.videoSource })
+    .select({ id: t.photos.id, caption: t.photos.caption, hasVideo: sql<number>`${t.photos.video} IS NOT NULL`, videoSource: t.photos.videoSource, videoSound: t.photos.videoSound })
     .from(t.photos)
     .orderBy(t.photos.position)
     .all();
@@ -89,13 +90,15 @@ function loadContent(): SiteContent {
       letterBody: settingsRow?.letterBody ?? "",
       letterSignoff: settingsRow?.letterSignoff ?? "",
       headings: parseHeadings(settingsRow?.headings),
+      footerText: settingsRow?.footerText ?? "Once again, Happy 27th Birthday! Made with love 💕",
     },
     timeline: timeline.map((e) => ({
       id: e.id, date: e.date, title: e.title, description: e.description,
       emoji: e.emoji, position: e.position,
     })),
     photos: photoRows.map((p) => ({ id: p.id, caption: p.caption, hasVideo: Boolean(p.hasVideo),
-      videoSource: p.videoSource === "user" ? "user" : p.videoSource === "auto" ? "auto" : null })),
+      videoSource: p.videoSource === "user" ? "user" : p.videoSource === "auto" ? "auto" : null,
+      videoSound: p.videoSound === 1 })),
     chats: chats.map((c) => ({
       id: c.id, side: c.side === "partner" ? "partner" : "me",
       text: c.text, timeLabel: c.timeLabel, delayMs: c.delayMs, position: c.position,

@@ -42,6 +42,7 @@ const bodySchema = z.object({
   letterBody: z.string().trim().min(1).max(5000),
   letterSignoff: z.string().trim().min(1).max(60),
   headings: headingsSchema.optional(),
+  footerText: z.string().trim().max(200).optional(),
 });
 
 export async function PUT(req: Request) {
@@ -63,6 +64,7 @@ export async function PUT(req: Request) {
         letterTitle: body.letterTitle,
         letterBody: body.letterBody,
         letterSignoff: body.letterSignoff,
+        ...(body.footerText !== undefined ? { footerText: body.footerText } : {}),
         ...(body.headings ? { headings: JSON.stringify(body.headings) } : {}),
         updatedAt: new Date().toISOString(),
       })

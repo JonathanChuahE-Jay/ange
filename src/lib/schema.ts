@@ -31,6 +31,7 @@ export const settings = sqliteTable("settings", {
   letterSignoff: text("letter_signoff").notNull().default("Yours, always"),
   /** JSON: per-section { kicker, title, note } overrides (see lib/headings.ts) */
   headings: text("headings").notNull().default("{}"),
+  footerText: text("footer_text").notNull().default("Once again, Happy 27th Birthday! Made with love 💕"),
   updatedAt: text("updated_at").notNull(),
 });
 
@@ -54,6 +55,8 @@ export const photos = sqliteTable("photos", {
   /** auto-generated cinematic motion clip (mp4), null until rendered */
   video: blob("video", { mode: "buffer" }),
   videoMime: text("video_mime"),
+  /** 1 = your uploaded video plays with its sound in the viewer, 0 = muted */
+  videoSound: integer("video_sound").notNull().default(0),
   position: integer("position").notNull().default(0),
   createdAt: text("created_at").notNull(),
 });

@@ -6,7 +6,7 @@ import { LazyScene } from "@/components/three/LazyScene";
 
 const LanternScene = dynamic(() => import("@/components/three/LanternScene"), { ssr: false });
 
-export function Footer({ askerName, partnerName }: { askerName: string; partnerName: string }) {
+export function Footer({ text }: { text: string }) {
   return (
     <footer className="relative overflow-hidden bg-gradient-to-b from-dusk1 to-dusk0 px-5 pt-24 pb-36 md:pt-28 md:pb-40">
       <div aria-hidden className="stars-layer absolute inset-0 opacity-50" />
@@ -24,11 +24,11 @@ export function Footer({ askerName, partnerName }: { askerName: string; partnerN
           <span className="h-px flex-1 bg-gradient-to-l from-transparent to-white/30" />
         </div>
 
-        <p className="font-hand text-3xl md:text-4xl">
-          <ShinyText text="made with" color="#ffffff" shineColor="#F3C98B" speed={4} />{" "}
-          <span className="icon-[lucide--heart] inline-block size-5 animate-pulse align-middle text-rose" />{" "}
-          <ShinyText text={`by ${askerName} for ${partnerName}`} color="#ffffff" shineColor="#F3C98B" speed={4} delay={0.4} />
-        </p>
+        {text && (
+          <p className="wrap max-w-2xl font-hand text-3xl md:text-4xl">
+            <ShinyText text={text} color="#ffffff" shineColor="#F3C98B" speed={4} />
+          </p>
+        )}
       </div>
     </footer>
   );

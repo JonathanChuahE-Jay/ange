@@ -9,7 +9,8 @@ import { enqueuePhotoVideo, isPhotoVideoFailed, isPhotoVideoPending } from "@/li
 
 const bodySchema = z.object({
   id: z.number().int(),
-  caption: z.string().max(300),
+  caption: z.string().max(300).optional(),
+  videoSound: z.boolean().optional(),
 });
 
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -28,6 +29,7 @@ export async function GET(req: Request) {
         mime: t.photos.mime,
         hasVideo: sql<number>`${t.photos.video} IS NOT NULL`,
         videoSource: t.photos.videoSource,
+        videoSound: t.photos.videoSound,
         position: t.photos.position,
         createdAt: t.photos.createdAt,
       })
@@ -41,6 +43,7 @@ export async function GET(req: Request) {
       ...r,
       hasVideo: Boolean(r.hasVideo),
       videoSource: r.videoSource ?? null,
+      videoSound: r.videoSound === 1,
       videoPending: !r.hasVideo && isPhotoVideoPending(r.id),
       videoFailed: !r.hasVideo && isPhotoVideoFailed(r.id),
     }));
@@ -82,14 +85,17 @@ export async function POST(req: Request) {
   });
 }
 
-/** Update caption only (photo bytes are immutable — delete + re-upload). */
+/** Update caption and/or video sound (photo bytes are immutable — delete + re-upload). */
 export async function PUT(req: Request) {
   return route(async () => {
     await requireAuth();
     const body = bodySchema.parse(await req.json());
-    const exists = db.select().from(t.photos).where(eq(t.photos.id, body.id)).limit(1).all()[0];
+    const exists = db.select({ id: t.photos.id }).from(t.photos).where(eq(t.photos.id, body.id)).limit(1).all()[0];
     if (!exists) throw new ApiError("content.photos.not_found");
-    db.update(t.photos).set({ caption: body.caption }).where(eq(t.photos.id, body.id)).run();
-    return Response.json({ id: body.id, caption: body.caption });
+    const patch: { caption?: string; videoSound?: number } = {};
+    if (body.caption !== undefined) patch.caption = body.caption;
+    if (body.videoSound !== undefined) patch.videoSound = body.videoSound ? 1 : 0;
+    if (Object.keys(patch).length > 0) db.update(t.photos).set(patch).where(eq(t.photos.id, body.id)).run();
+    return Response.json(body);
   });
 }

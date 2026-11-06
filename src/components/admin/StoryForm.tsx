@@ -29,6 +29,7 @@ const schema = z.object({
   letterTitle: z.string().trim().min(1, "Required").max(120),
   letterBody: z.string().trim().min(1, "Required").max(5000),
   letterSignoff: z.string().trim().min(1, "Required").max(60),
+  footerText: z.string().trim().max(200),
   headings: z.record(z.string(), headingSchema),
 });
 
@@ -60,6 +61,7 @@ export function StoryForm() {
         letterTitle: s.letterTitle,
         letterBody: s.letterBody,
         letterSignoff: s.letterSignoff,
+        footerText: s.footerText,
         headings: s.headings,
       });
     }
@@ -166,6 +168,17 @@ export function StoryForm() {
           <TextArea label="Letter body" rows={10} className="min-h-48" value={form.letterBody} error={errors.letterBody} onChange={(e) => set("letterBody", e.target.value)} />
           <TextField label="Sign-off" value={form.letterSignoff} error={errors.letterSignoff} onChange={(e) => set("letterSignoff", e.target.value)} />
         </div>
+      </fieldset>
+
+      <fieldset className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5">
+        <legend className="px-2 font-display text-lg text-ink">Footer</legend>
+        <TextField
+          label="Footer message"
+          value={form.footerText}
+          error={errors.footerText}
+          hint="Shown at the very bottom of the page. Leave empty to hide it."
+          onChange={(e) => set("footerText", e.target.value)}
+        />
       </fieldset>
 
       <fieldset className="min-w-0 rounded-2xl border border-line bg-white p-4 sm:p-5">

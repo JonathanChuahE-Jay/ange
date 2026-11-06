@@ -353,7 +353,7 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
                   background="linear-gradient(135deg, #E25A74 0%, #D64560 45%, #B03052 100%)"
                   shimmerColor="#FFE3EA"
                   shimmerDuration="2.6s"
-                  className="tap-spring min-h-14 px-12 text-lg font-bold shadow-[0_0_40px_rgb(214_69_96/0.55)] transition-shadow hover:shadow-[0_0_60px_rgb(214_69_96/0.8)]"
+                  className="tap-spring h-14 min-w-[10rem] px-10 py-0 text-lg font-bold sm:min-w-[13rem] shadow-[0_0_40px_rgb(214_69_96/0.55)] transition-shadow hover:shadow-[0_0_60px_rgb(214_69_96/0.8)]"
                 >
                   <span className="relative z-10 flex items-center gap-2">Yes <span className="icon-[lucide--heart] size-5" /></span>
                 </ShimmerButton>

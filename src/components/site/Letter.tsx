@@ -217,7 +217,7 @@ export function Letter({ settings }: { settings: Settings }) {
                   </div>
                 </div>
 
-                <h3 className="mt-5 font-display text-3xl text-ink">{settings.letterTitle}</h3>
+                <h3 className="wrap mt-5 font-display text-3xl leading-tight text-ink [text-wrap:balance]">{settings.letterTitle}</h3>
                 <p
                   className="wrap mt-4 font-hand text-[1.55rem] leading-[1.7] text-ink/90 first-letter:float-left first-letter:mr-2 first-letter:font-display first-letter:text-6xl first-letter:leading-[0.9] first-letter:text-rose"
                   data-multiline

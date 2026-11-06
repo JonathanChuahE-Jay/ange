@@ -47,6 +47,17 @@ export function PhotosManager() {
     onError: (e) => toast(messageForCode((e as { code?: string }).code), "error"),
   });
 
+  const setSound = useMutation({
+    mutationFn: ({ id, on }: { id: number; on: boolean }) =>
+      api.send("/api/admin/photos", "PUT", { id, videoSound: on }),
+    onSuccess: (_d, { on }) => {
+      qc.invalidateQueries({ queryKey: ["photos"] });
+      qc.invalidateQueries({ queryKey: ["site"] });
+      toast(on ? "Sound on — the video plays with its audio" : "Muted — the video plays silently");
+    },
+    onError: (e) => toast(messageForCode((e as { code?: string }).code), "error"),
+  });
+
   // while motion clips render in the background, refresh the list so badges update
   const rendering = list.data?.items.some((p) => !p.hasVideo && !p.videoFailed) ?? false;
   useEffect(() => {
@@ -137,7 +148,9 @@ export function PhotosManager() {
             videoInput.current?.click();
           }}
           onRemoveVideo={setRemovingVideo}
+          onToggleSound={(p) => setSound.mutate({ id: p.id, on: !p.videoSound })}
           busyVideo={attachVideo.isPending}
+          busySound={setSound.isPending}
         />
       )}
 
@@ -211,7 +224,9 @@ function PagedGrid({
   onDelete,
   onAttachVideo,
   onRemoveVideo,
+  onToggleSound,
   busyVideo,
+  busySound,
 }: {
   items: Paged<AdminPhoto>;
   uploading: boolean;
@@ -219,7 +234,9 @@ function PagedGrid({
   onDelete: (p: AdminPhoto) => void;
   onAttachVideo: (p: AdminPhoto) => void;
   onRemoveVideo: (p: AdminPhoto) => void;
+  onToggleSound: (p: AdminPhoto) => void;
   busyVideo: boolean;
+  busySound: boolean;
 }) {
   if (items.items.length === 0 && !uploading) {
     return (
@@ -268,6 +285,12 @@ function PagedGrid({
               }
             />
             {p.videoSource === "user" ? "your video" : p.hasVideo ? "clip" : p.videoFailed ? "clip failed" : "rendering"}
+            {p.videoSource === "user" && (
+              <span
+                className={p.videoSound ? "icon-[lucide--volume-2] size-3" : "icon-[lucide--volume-x] size-3"}
+                aria-label={p.videoSound ? "with sound" : "muted"}
+              />
+            )}
           </span>
           <figcaption className="wrap truncate px-3 py-2 text-[13px] text-inksoft" data-multiline>
             {p.caption || "—"}
@@ -282,6 +305,20 @@ function PagedGrid({
             >
               <span className="icon-[lucide--clapperboard] size-4" />
             </button>
+            {p.videoSource === "user" && (
+              <button
+                onClick={() => onToggleSound(p)}
+                disabled={busySound}
+                aria-pressed={p.videoSound}
+                aria-label={p.videoSound ? "Mute your video" : "Play your video with sound"}
+                title={p.videoSound ? "Sound is ON — click to mute" : "Sound is OFF — click to play with sound"}
+                className={`flex size-10 items-center justify-center rounded-full shadow-md transition-colors disabled:opacity-50 ${
+                  p.videoSound ? "bg-rose text-white hover:bg-rosedeep" : "bg-white/90 text-ink hover:text-rose"
+                }`}
+              >
+                <span className={p.videoSound ? "icon-[lucide--volume-2] size-4" : "icon-[lucide--volume-x] size-4"} />
+              </button>
+            )}
             {p.videoSource === "user" && (
               <button
                 onClick={() => onRemoveVideo(p)}

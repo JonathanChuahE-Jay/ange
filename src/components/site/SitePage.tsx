@@ -10,7 +10,6 @@ import { Photos } from "./Photos";
 import { Chats } from "./Chats";
 import { Letter } from "./Letter";
 import { Loves } from "./Loves";
-import { Games } from "./Games";
 import { Countdown } from "./Countdown";
 import { Footer } from "./Footer";
 import { DotNav } from "./DotNav";
@@ -42,11 +41,10 @@ export function SitePage({ initial }: { initial: SiteContent }) {
         chats={c.chats}
         partnerName={c.settings.partnerName}
       />
-      <Letter settings={c.settings} />
       <Loves loves={c.loves} />
-      <Games photos={c.photos} quiz={c.quiz} />
+      <Letter settings={c.settings} />
       <Countdown settings={c.settings} />
-      <Footer askerName={c.settings.askerName} partnerName={c.settings.partnerName} />
+      <Footer text={c.settings.footerText} />
       <DotNav />
       <CustomCursor />
       <SmoothScroll />

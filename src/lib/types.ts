@@ -14,6 +14,7 @@ export type Settings = {
   letterBody: string;
   letterSignoff: string;
   headings: Headings;
+  footerText: string;
 };
 
 export type TimelineEvent = {
@@ -32,6 +33,8 @@ export type PhotoMeta = {
   hasVideo: boolean;
   /** where the clip came from: generated Ken Burns ('auto') or uploaded ('user') */
   videoSource: "auto" | "user" | null;
+  /** your uploaded video plays with sound (admin toggle) */
+  videoSound: boolean;
 };
 
 export type ChatQuote = {

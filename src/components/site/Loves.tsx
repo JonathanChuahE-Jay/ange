@@ -12,25 +12,16 @@ const STYLES = [
   "bg-white border-line",
 ];
 const ROTS = ["-rotate-2", "rotate-1", "-rotate-1", "rotate-2"];
-const ICONS = [
-  "icon-[lucide--heart]",
-  "icon-[lucide--sparkles]",
-  "icon-[lucide--star]",
-  "icon-[lucide--flower-2]",
-  "icon-[lucide--sun]",
-  "icon-[lucide--moon-star]",
-];
 
 function Sticker({ love, i }: { love: Love; i: number }) {
   return (
     <div
       className={cn(
-        "flex min-h-14 items-center gap-3 rounded-full border px-6 py-3.5 shadow-[0_10px_24px_-14px_rgb(176_48_82/0.45)] transition-transform duration-300 hover:scale-105 hover:rotate-0",
+        "flex min-h-14 items-center rounded-full border px-6 py-3.5 shadow-[0_10px_24px_-14px_rgb(176_48_82/0.45)] transition-transform duration-300 hover:scale-105 hover:rotate-0",
         STYLES[i % STYLES.length],
         ROTS[i % ROTS.length],
       )}
     >
-      <span className={cn(ICONS[i % ICONS.length], "size-5 shrink-0 text-rose")} aria-hidden />
       <span className="text-lg font-bold text-ink">{love.text}</span>
     </div>
   );

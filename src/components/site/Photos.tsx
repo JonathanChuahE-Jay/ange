@@ -19,7 +19,30 @@ import { SectionHeading } from "./SectionHeading";
 const TILTS = [-2.2, 2, -1.2, 2.8, -2.8, 1.2];
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-type Rect = { top: number; left: number; width: number; height: number };
+type Rect = { top: number; left: number; width: number; height: number; rotate: number };
+
+/**
+ * The thumbnail's TRUE geometry. Its polaroid is tilted, so getBoundingClientRect
+ * returns a larger axis-aligned box — instead take the untransformed size, the
+ * card's live rotation/scale, and the (rotation-invariant) centre.
+ */
+function measureThumb(img: HTMLImageElement): Rect {
+  const r = img.getBoundingClientRect();
+  const card = img.closest("button");
+  let rotate = 0;
+  let scale = 1;
+  const tf = card ? getComputedStyle(card).transform : "none";
+  if (tf && tf !== "none") {
+    const m = new DOMMatrixReadOnly(tf);
+    rotate = (Math.atan2(m.b, m.a) * 180) / Math.PI;
+    scale = Math.hypot(m.a, m.b);
+  }
+  const width = img.offsetWidth * scale;
+  const height = img.offsetHeight * scale;
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+  return { top: cy - height / 2, left: cx - width / 2, width, height, rotate };
+}
 type Opened = { index: number; from: Rect; aspect: number };
 
 /**
@@ -67,9 +90,9 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
   const open = useCallback((index: number) => {
     const img = imgRefs.current[index];
     if (!img) return;
-    const r = img.getBoundingClientRect();
-    const aspect = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : r.width / r.height;
-    setOpened({ index, from: { top: r.top, left: r.left, width: r.width, height: r.height }, aspect });
+    const from = measureThumb(img);
+    const aspect = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : from.width / from.height;
+    setOpened({ index, from, aspect });
   }, []);
 
   if (photos.length === 0) {
@@ -90,7 +113,9 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
     <section id="photos" className="relative scroll-mt-0">
       {/* tall scroller: vertical scroll distance == horizontal travel */}
       <div ref={outerRef} style={{ height: distance + vh }} className="relative">
-        <div className="sticky top-0 flex h-[100dvh] flex-col justify-center overflow-hidden pt-14">
+        {/* safe center: on short screens overflow goes DOWN, so the heading never
+            gets clipped / pushed up against the timeline above */}
+        <div className="sticky top-0 flex h-[100dvh] flex-col justify-[safe_center] overflow-hidden pt-14">
           <div className="mx-auto w-full max-w-6xl px-5">
             <SectionHeading section="photos" icon="icon-[lucide--camera]" />
           </div>
@@ -123,7 +148,7 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
                     src={`/api/photos/${p.id}/raw`}
                     alt={p.caption || "a photo of us"}
                     loading={i < 4 ? "eager" : "lazy"}
-                    className="aspect-[4/5] w-full object-cover transition-opacity duration-150"
+                    className="aspect-[4/5] w-full object-cover"
                     style={{ opacity: opened?.index === i ? 0 : 1 }}
                   />
                   {/* lifted-out slot */}
@@ -166,8 +191,8 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
             from={opened.from}
             aspect={opened.aspect}
             sourceRect={() => {
-              const r = imgRefs.current[opened.index]?.getBoundingClientRect();
-              return r ? { top: r.top, left: r.left, width: r.width, height: r.height } : opened.from;
+              const img = imgRefs.current[opened.index];
+              return img ? measureThumb(img) : opened.from;
             }}
             onClosed={() => setOpened(null)}
           />
@@ -190,7 +215,7 @@ function fitRect(aspect: number): Rect {
     height = vh;
     width = vh * aspect;
   }
-  return { top: (vh - height) / 2, left: (vw - width) / 2, width, height };
+  return { top: (vh - height) / 2, left: (vw - width) / 2, width, height, rotate: 0 };
 }
 
 function Cinema({
@@ -212,6 +237,8 @@ function Cinema({
   // only a video you uploaded plays here; the auto-generated Ken Burns clip
   // zooms into the photo, so the viewer shows the still photo instead
   const [noVideo, setNoVideo] = useState(photo.videoSource !== "user");
+  // the admin chooses per video whether it plays with sound
+  const [muted, setMuted] = useState(!photo.videoSound);
   const videoRef = useRef<HTMLVideoElement>(null);
   const reduced = useRef(false);
 
@@ -219,17 +246,25 @@ function Cinema({
   const left = useMotionValue(from.left);
   const width = useMotionValue(from.width);
   const height = useMotionValue(from.height);
+  const rotate = useMotionValue(from.rotate);
   const radius = useMotionValue(3);
   const shade = useMotionValue(0);
+  // the big drop shadow fades with the backdrop so nothing pops when it lands
+  const shadow = useTransform(shade, (s) => `0 40px 120px -20px rgb(0 0 0 / ${(0.7 * s).toFixed(3)})`);
 
   useEffect(() => {
     setMounted(true);
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const html = document.documentElement;
     const prev = html.style.overflow;
+    const prevGutter = html.style.scrollbarGutter;
+    // keep the scrollbar's space while locked so the strip doesn't shift sideways
+    // (and then jump back when the viewer closes)
+    html.style.scrollbarGutter = "stable";
     html.style.overflow = "hidden"; // the page stays put underneath
     return () => {
       html.style.overflow = prev;
+      html.style.scrollbarGutter = prevGutter;
     };
   }, []);
 
@@ -240,6 +275,7 @@ function Cinema({
     const t = reduced.current ? { duration: 0 } : { duration: 0.75, ease: EASE };
     void animate(shade, 1, { duration: reduced.current ? 0 : 0.5 });
     void animate(radius, 0, t);
+    void animate(rotate, 0, t);
     void animate(top, to.top, t);
     void animate(left, to.left, t);
     void animate(width, to.width, t);
@@ -248,9 +284,17 @@ function Cinema({
       if (reduced.current) return;
       const v = videoRef.current;
       if (!v) return setNoVideo(true);
-      void v.play().catch(() => setNoVideo(true));
+      v.muted = !photo.videoSound;
+      void v.play().catch(() => {
+        // the browser blocked audio autoplay — play silently, the speaker button can unmute
+        if (!v.muted) {
+          v.muted = true;
+          setMuted(true);
+          void v.play().catch(() => setNoVideo(true));
+        } else setNoVideo(true);
+      });
     });
-  }, [mounted, aspect, top, left, width, height, radius, shade]);
+  }, [mounted, aspect, top, left, width, height, rotate, radius, shade, photo.videoSound]);
 
   const close = useCallback(() => {
     if (phase === "out") return;
@@ -261,11 +305,12 @@ function Cinema({
     const t = reduced.current ? { duration: 0 } : { duration: 0.6, ease: EASE };
     void animate(shade, 0, { duration: reduced.current ? 0 : 0.45 });
     void animate(radius, 3, t);
+    void animate(rotate, to.rotate, t);
     void animate(top, to.top, t);
     void animate(left, to.left, t);
     void animate(width, to.width, t);
     void animate(height, to.height, t).then(onClosed);
-  }, [phase, sourceRect, onClosed, top, left, width, height, radius, shade]);
+  }, [phase, sourceRect, onClosed, top, left, width, height, rotate, radius, shade]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
@@ -287,8 +332,8 @@ function Cinema({
 
       {/* the photo, flying from its frame to fullscreen — then it becomes a film */}
       <motion.div
-        style={{ top, left, width, height, borderRadius: radius }}
-        className="absolute overflow-hidden shadow-[0_40px_120px_-20px_rgb(0_0_0/0.7)]"
+        style={{ top, left, width, height, rotate, borderRadius: radius, boxShadow: shadow }}
+        className="absolute overflow-hidden"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -301,13 +346,14 @@ function Cinema({
             ref={videoRef}
             src={`/api/photos/${photo.id}/video`}
             poster={src}
-            muted
+            muted={muted}
             playsInline
             preload="auto"
             onPlaying={() => setVideoOn(true)}
             onError={() => setNoVideo(true)}
-            className="absolute inset-0 size-full bg-black object-contain transition-opacity duration-500"
-            style={{ opacity: videoOn ? 1 : 0 }}
+            className="absolute inset-0 size-full bg-black object-contain transition-opacity"
+            // fade in gently; on close vanish fast so no black letterbox rides the flight home
+            style={{ opacity: videoOn ? 1 : 0, transitionDuration: phase === "out" ? "150ms" : "500ms" }}
           />
         )}
         {/* cinematic dressing */}
@@ -321,6 +367,26 @@ function Cinema({
           <Sparkles />
         </motion.div>
       </motion.div>
+
+      {/* sound toggle — only for videos the admin set to play with sound */}
+      {photo.videoSound && !noVideo && videoOn && phase === "shown" && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            const v = videoRef.current;
+            if (!v) return;
+            v.muted = !v.muted;
+            setMuted(v.muted);
+            if (v.paused) void v.play().catch(() => {});
+          }}
+          aria-label={muted ? "Unmute video" : "Mute video"}
+          className="absolute top-[max(1rem,env(safe-area-inset-top))] right-4 z-10 flex size-11 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md transition-colors hover:bg-black/60"
+        >
+          <span className={muted ? "icon-[lucide--volume-x] size-5" : "icon-[lucide--volume-2] size-5"} />
+        </motion.button>
+      )}
 
       {/* caption + hint */}
       <AnimatePresence>
