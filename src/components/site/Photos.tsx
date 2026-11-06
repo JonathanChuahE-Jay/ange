@@ -53,6 +53,7 @@ type Opened = { index: number; from: Rect; aspect: number };
 export function Photos({ photos }: { photos: PhotoMeta[] }) {
   const outerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const imgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [distance, setDistance] = useState(0);
   const [vh, setVh] = useState(800);
@@ -62,14 +63,19 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
   // how far the track must travel = its overflow beyond the viewport
   useLayoutEffect(() => {
     const track = trackRef.current;
-    if (!track) return;
+    const panel = panelRef.current;
+    if (!track || !panel) return;
     const measure = () => {
       setDistance(Math.max(0, track.scrollWidth - window.innerWidth));
-      setVh(window.innerHeight);
+      // the sticky panel is 100svh tall — a STABLE height. window.innerHeight
+      // changes on phones as the address bar slides in/out, which resized this
+      // whole scroller mid-swipe and made the page jump.
+      setVh(panel.offsetHeight);
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(track);
+    ro.observe(panel);
     window.addEventListener("resize", measure);
     return () => {
       ro.disconnect();
@@ -115,7 +121,7 @@ export function Photos({ photos }: { photos: PhotoMeta[] }) {
       <div ref={outerRef} style={{ height: distance + vh }} className="relative">
         {/* safe center: on short screens overflow goes DOWN, so the heading never
             gets clipped / pushed up against the timeline above */}
-        <div className="sticky top-0 flex h-[100dvh] flex-col justify-[safe_center] overflow-hidden pt-14">
+        <div ref={panelRef} className="sticky top-0 flex h-[100svh] flex-col justify-[safe_center] overflow-hidden pt-14">
           <div className="mx-auto w-full max-w-6xl px-5">
             <SectionHeading section="photos" icon="icon-[lucide--camera]" />
           </div>

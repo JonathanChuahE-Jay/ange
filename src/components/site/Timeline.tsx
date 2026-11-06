@@ -131,7 +131,9 @@ export function Timeline({ events }: { events: TEvent[] }) {
   // every card must fit on screen while pinned (the deepest one sits lowest),
   // otherwise on short screens it runs into the next section
   const lowestTop = STICK_TOP + (total - 1) * PEEK;
-  const cardHeight = `clamp(340px, calc(100dvh - ${lowestTop + 28}px), 720px)`;
+  // svh, not dvh: on phones dvh changes while the address bar slides in/out, which
+  // resized the cards (and their reading room) mid-scroll and made the page jump
+  const cardHeight = `clamp(340px, calc(100svh - ${lowestTop + 28}px), 720px)`;
 
   return (
     <section

@@ -274,7 +274,7 @@ export function Hero({ settings, answeredYesAt }: HeroProps) {
   return (
     <section
       id="question"
-      className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-5"
+      className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-5"
     >
       {/* dusk gradient sky + three.js scene */}
       <div

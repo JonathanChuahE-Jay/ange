@@ -209,16 +209,16 @@ export function Letter({ settings }: { settings: Settings }) {
               }}
             >
               <div className="relative rounded-[3px] bg-[#FFFBF0] p-7 md:p-11">
-                <div className="flex items-start justify-end gap-4">
-                  <div className="flex rotate-3 flex-col items-center rounded-sm border-2 border-dashed border-gold/50 bg-white px-2.5 py-1.5">
+                <div className="flex items-start justify-between gap-4">
+                  <h3 className="wrap min-w-0 flex-1 font-display text-3xl leading-tight text-ink [text-wrap:balance]">{settings.letterTitle}</h3>
+                  <div className="flex shrink-0 rotate-3 flex-col items-center rounded-sm border-2 border-dashed border-gold/50 bg-white px-2.5 py-1.5">
                     <span className="icon-[lucide--heart] size-4.5 text-rose" aria-hidden />
                     <span className="text-[9px] font-bold tracking-[0.2em] text-gold">LOVE POST</span>
                   </div>
                 </div>
 
-                <h3 className="wrap mt-5 font-display text-3xl leading-tight text-ink [text-wrap:balance]">{settings.letterTitle}</h3>
                 <p
-                  className="wrap mt-4 font-hand text-[1.55rem] leading-[1.7] text-ink/90"
+                  className="wrap mt-6 font-hand text-[1.55rem] leading-[1.7] text-ink/90"
                   data-multiline
                 >
                   {settings.letterBody}
