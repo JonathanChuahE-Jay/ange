@@ -8,6 +8,7 @@ import { Meteors } from "@/components/kit/meteors";
 import { BorderBeam } from "@/components/kit/border-beam";
 import { ShimmerButton } from "@/components/kit/shimmer-button";
 import { cn } from "@/lib/utils";
+import { primeMusic } from "@/lib/music-audio";
 import { DEFAULT_HEADINGS, type Heading } from "@/lib/headings";
 import dynamic from "next/dynamic";
 import { LazyScene } from "@/components/three/LazyScene";
@@ -57,6 +58,9 @@ export function DateGate({ heading = DEFAULT_HEADINGS.gate }: { heading?: Headin
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!complete || busy) return;
+    // this tap is our user gesture: unlock audio now (before any await) so the
+    // song can start by itself as soon as the site opens
+    primeMusic();
     const date = `${val.y}-${val.m.padStart(2, "0")}-${val.d.padStart(2, "0")}`;
     setBusy(true);
     try {

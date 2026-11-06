@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { Track } from "@/lib/types";
+import { getMusicAudio } from "@/lib/music-audio";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/kit/tooltip";
 
 const SPRING = { type: "spring", stiffness: 420, damping: 34, mass: 0.8 } as const;
@@ -11,6 +12,11 @@ const SPRING = { type: "spring", stiffness: 420, damping: 34, mass: 0.8 } as con
  * Music player — a little bubble in the top-right corner. Tap it and it
  * springs open into the full player; tap outside, press Esc or the chevron
  * to tuck it back into a bubble. Plays admin-uploaded tracks site-wide.
+ *
+ * Starts by itself when the site opens: entering through the date gate
+ * unlocks audio (see music-audio.ts). If the browser still blocks it (e.g. a
+ * returning visitor who skipped the gate), it starts on the first tap/key
+ * anywhere. Once paused by hand it stays paused.
  */
 export function TopMusicBar({ tracks }: { tracks: Track[] }) {
   const audio = useRef<HTMLAudioElement | null>(null);
@@ -18,12 +24,13 @@ export function TopMusicBar({ tracks }: { tracks: Track[] }) {
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [open, setOpen] = useState(false);
+  const userPaused = useRef(false); // paused by hand → never auto-start again
 
   useEffect(() => {
-    audio.current = new Audio();
-    audio.current.preload = "none";
+    audio.current = getMusicAudio();
     const el = audio.current;
     const onEnded = () => {
+      if (!el.src.includes("/api/tracks/")) return; // the silent unlock clip
       setIdx((i) => {
         const next = (i + 1) % tracks.length;
         if (el) {
@@ -34,7 +41,36 @@ export function TopMusicBar({ tracks }: { tracks: Track[] }) {
       });
     };
     el.addEventListener("ended", onEnded);
+
+    /* ---- auto-start ---- */
+    let started = false;
+    const start = () => {
+      if (started || userPaused.current || tracks.length === 0) return;
+      if (!el.src.includes("/api/tracks/")) el.src = `/api/tracks/${tracks[0].id}/raw`;
+      el.play()
+        .then(() => {
+          started = true;
+          setPlaying(true);
+          disarm();
+        })
+        .catch(() => {}); // blocked → wait for the first tap/key
+    };
+    // fallback: the first real gesture anywhere (except on the player itself,
+    // whose own button already handles play/pause)
+    const onGesture = (e: Event) => {
+      if (rootRef.current && e.target instanceof Node && rootRef.current.contains(e.target)) {
+        disarm();
+        return;
+      }
+      start();
+    };
+    const GESTURES = ["pointerdown", "keydown", "touchend"] as const;
+    const disarm = () => GESTURES.forEach((g) => document.removeEventListener(g, onGesture, true));
+    GESTURES.forEach((g) => document.addEventListener(g, onGesture, true));
+    start();
+
     return () => {
+      disarm();
       el.pause();
       el.removeEventListener("ended", onEnded);
     };
@@ -63,9 +99,11 @@ export function TopMusicBar({ tracks }: { tracks: Track[] }) {
     const el = audio.current;
     if (!el) return;
     if (playing) {
+      userPaused.current = true;
       el.pause();
       setPlaying(false);
     } else {
+      userPaused.current = false;
       if (!el.src || el.src !== absoluteUrl(current.id)) {
         el.src = `/api/tracks/${current.id}/raw`;
       }
