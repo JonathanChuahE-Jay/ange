@@ -32,6 +32,7 @@ export function Letter({ settings }: { settings: Settings }) {
   const env = useMotionValue(300); // envelope height
   const head = useMotionValue(135); // headroom above envelope
   const letterH = useMotionValue(800);
+  const sideGap = useMotionValue(20); // envelope edge → letter edge, each side
 
   // animation motion values
   const letterY = useMotionValue(0);
@@ -52,6 +53,7 @@ export function Letter({ settings }: { settings: Settings }) {
       env.set(e);
       head.set(Math.round(e * 0.45));
       letterH.set(letter.offsetHeight);
+      sideGap.set(Math.max(0, (stage.clientWidth - letter.offsetWidth) / 2));
       if (phase === "sealed") letterY.set(head.get() + e * 0.1);
     };
     measure();
@@ -59,18 +61,21 @@ export function Letter({ settings }: { settings: Settings }) {
     ro.observe(stage);
     ro.observe(letter);
     return () => ro.disconnect();
-  }, [phase, env, head, letterH, letterY]);
+  }, [phase, env, head, letterH, letterY, sideGap]);
 
   useMotionValueEvent(flapRot, "change", (v) => {
     if (v > 90 && !flapBehind) setFlapBehind(true);
   });
 
   // hide whatever part of the letter is still below the envelope's bottom edge
-  const clip = useTransform([letterY, envY, letterH, env, head], ([ly, ey, h, e, p]: number[]) => {
+  const clip = useTransform([letterY, envY, letterH, env, head, sideGap], ([ly, ey, h, e, p, g]: number[]) => {
     // +16px: the tilted letter's clip edge rotates with it, so over-clip slightly;
     // the final envelope position leaves 24px of slack, so this reaches 0 when out
     const hidden = Math.max(0, ly + h - (p + ey + e) + 16);
-    return `inset(-80px -80px ${hidden}px -80px)`;
+    // while it's still tucked in, never let it poke past the envelope's sides;
+    // once it has risen out, give the drop shadow room again
+    const side = ly >= p * 0.85 ? Math.max(0, g - 2) : 80;
+    return `inset(-80px -${side}px ${hidden}px -${side}px)`;
   });
   // stage grows with the envelope as it slides down, capped at the letter height
   const stageH = useTransform([envY, letterH, env, head], ([ey, h, e, p]: number[]) =>
@@ -197,7 +202,9 @@ export function Letter({ settings }: { settings: Settings }) {
             style={
               isOpen
                 ? undefined
-                : { y: letterY, clipPath: clip, rotate: letterRot }
+                : // tilt from the top edge: rotating around the middle of a tall letter
+                  // swings its visible top sideways out of the envelope
+                  { y: letterY, clipPath: clip, rotate: letterRot, transformOrigin: "50% 0%" }
             }
             className={isOpen ? "relative z-20 mx-[5%]" : "absolute inset-x-[5%] top-0 z-20"}
           >
